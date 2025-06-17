@@ -1,0 +1,61 @@
+﻿<UserControl
+    x:Class="Nodify.Views.NodeSpaceControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Nodify.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <Canvas
+            Name="SpaceCanvas"
+            Background="#EEE"
+            MouseLeftButtonUp="SpaceCanvas_OnMouseLeftButtonUp"
+            MouseMove="SpaceCanvas_OnMouseMove"
+            MouseRightButtonUp="SpaceCanvas_OnMouseRightButtonUp">
+            <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:ConnectionControl DataContext="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Polyline
+                IsHitTestVisible="False"
+                Points="{Binding ViewModel.TempLine, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}"
+                Stroke="Gray"
+                StrokeDashArray="4 2"
+                StrokeThickness="2" />
+            <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:NodeControl
+                            Canvas.Left="{Binding X}"
+                            Canvas.Top="{Binding Y}"
+                            ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
+                            ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
+                            DataContext="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+        </Canvas>
+    </Grid>
+</UserControl>
