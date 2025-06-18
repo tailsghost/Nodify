@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <converts:HalfOffsetConverter x:Key="HalfOffsetConverter" />
             <converts:HeightWithConnectorsConverter x:Key="HeightWithConnectorsConverter" />
+            <converts:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -12,6 +12,7 @@
         <Canvas
             Name="SpaceCanvas"
             Background="#EEE"
+            MouseLeftButtonDown="SpaceCanvas_OnMouseLeftButtonDown"
             MouseLeftButtonUp="SpaceCanvas_OnMouseLeftButtonUp"
             MouseMove="SpaceCanvas_OnMouseMove"
             MouseRightButtonUp="SpaceCanvas_OnMouseRightButtonUp">
@@ -27,12 +28,22 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Polyline
+            <Path
                 IsHitTestVisible="False"
-                Points="{Binding ViewModel.TempLine, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}"
+                Visibility="{Binding ViewModel.IsDragging, Converter={StaticResource BoolToVisibilityConverter}}"
                 Stroke="Gray"
-                StrokeDashArray="4 2"
-                StrokeThickness="2" />
+                StrokeThickness="2">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="{Binding ViewModel.TempStart, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                            <BezierSegment
+                                Point1="{Binding ViewModel.TempControl1, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
+                                Point2="{Binding ViewModel.TempControl2, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
+                                Point3="{Binding ViewModel.TempEnd,     RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
             <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -42,8 +53,6 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <local:NodeControl
-                            Canvas.Left="{Binding X}"
-                            Canvas.Top="{Binding Y}"
                             ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
                             ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
                             DataContext="{Binding}" />

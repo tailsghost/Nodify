@@ -1,19 +1,19 @@
 ﻿using Nodify.Helpers;
+using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-
-namespace Nodify.ViewModels;
 
 public class NodeSpaceViewModel : BaseViewModel
 {
     private ConnectorViewModel _dragStart;
     private Point _mousePos;
 
-    public ObservableCollection<NodeViewModel> Nodes { get; } = [];
-    public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
+    public ObservableCollection<NodeViewModel> Nodes { get; } = new();
+    public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
 
     public ICommand AddNodeCmd { get; }
 
@@ -22,68 +22,184 @@ public class NodeSpaceViewModel : BaseViewModel
         get
         {
             if (_dragStart == null) return null;
-            var p1 = new Point(_dragStart.X, _dragStart.Y);
-            return [p1, new Point(_mousePos.X, p1.Y), _mousePos];
+            return new PointCollection
+                {
+                    TempStart,
+                    new Point(_mousePos.X, TempStart.Y),
+                    TempEnd
+                };
         }
     }
+
+    private Point _tempStart;
+    public Point TempStart
+    {
+        get => _tempStart;
+        set
+        {
+            _tempStart = value;
+            OnPropertyChanged(nameof(TempStart));
+            OnPropertyChanged(nameof(TempLine));
+        }
+    }
+
+    private Point _tempEnd;
+    public Point TempEnd
+    {
+        get => _tempEnd;
+        set
+        {
+            _tempEnd = value;
+            OnPropertyChanged(nameof(TempEnd));
+            OnPropertyChanged(nameof(TempLine));
+        }
+    }
+
+    private bool _isDragging;
+    public bool IsDragging
+    {
+        get => _isDragging;
+        set
+        {
+            _isDragging = value;
+            OnPropertyChanged(nameof(IsDragging));
+        }
+    }
+
+    private Point _tempControl1;
+    public Point TempControl1
+    {
+        get => _tempControl1;
+        set
+        {
+            if (_tempControl1 == value) return;
+            _tempControl1 = value;
+            OnPropertyChanged(nameof(TempControl1));
+        }
+    }
+
+    private Point _tempControl2;
+    public Point TempControl2
+    {
+        get => _tempControl2;
+        set
+        {
+            if (_tempControl2 != value)
+            {
+                _tempControl2 = value;
+                OnPropertyChanged(nameof(TempControl2));
+            }
+        }
+    }
+
+    public double CurveOffset => System.Math.Abs(TempEnd.X - TempStart.X) * 0.25;
 
     public NodeSpaceViewModel()
     {
         Nodes.Add(new NodeViewModel("A", 50, 100));
         Nodes.Add(new NodeViewModel("B", 250, 150));
         Nodes.Add(new NodeViewModel("C", 450, 250));
-        foreach (var n in Nodes) Subscribe(n);
+
         AddNodeCmd = new RelayCommand(p =>
         {
-            if(p is not Point point) return;
+            if (p is not Point pt) return;
             var nm = $"N{Nodes.Count + 1}";
-            var node = new NodeViewModel(nm, point.X - 40, point.Y - 25);
-            Nodes.Add(node);
-            Subscribe(node);
+            var node = new NodeViewModel(nm, pt.X - 40, pt.Y - 25);
+            if (!IsOverlapping(node, node.X, node.Y))
+            {
+                Nodes.Add(node);
+            }
         });
-        Nodes.CollectionChanged += (_, _) =>
-        {
-            for (var i = 0; i < Nodes.Count; i++) Subscribe(Nodes[i]);
-        };
+
     }
 
-    public void BeginDrag(ConnectorViewModel c) => _dragStart = c;
+    public void BeginDrag(ConnectorViewModel c)
+    {
+        _dragStart = c;
+        IsDragging = true;
+        if (c != null)
+        {
+            TempStart = new Point(c.X, c.Y);
+            TempEnd = TempStart;
+            UpdateTempBezier();
+        }
+    }
 
     public void UpdateDrag(Point p)
     {
+        if (!IsDragging || _dragStart == null) return;
+
         _mousePos = p;
-        OnPropertyChanged(nameof(TempLine));
+        TempStart = new Point(_dragStart.X, _dragStart.Y);
+        TempEnd = p;
+        UpdateTempBezier();
     }
 
     public void EndDrag(ConnectorViewModel c)
     {
-        if (_dragStart != null && c != null && _dragStart != null)
-        {
-            var connector = new ConnectionViewModel(_dragStart, c);
-            Connections.Add(connector);
-        }
+        if (_dragStart != null && c != null)
+            Connections.Add(new ConnectionViewModel(_dragStart, c));
 
         _dragStart = null;
-        OnPropertyChanged(nameof(TempLine));
+        IsDragging = false;
+        TempStart = TempEnd = new Point();
+        UpdateTempBezier();
     }
 
-    public void RebuildAll()
+
+    private void UpdateTempBezier()
     {
-        for (var i = 0; i < Connections.Count; i++)
+        var dx = TempEnd.X - TempStart.X;
+        var offset = Math.Abs(dx) * 0.1;
+
+        TempControl1 = new Point(
+            TempStart.X + (dx >= 0 ? offset : -offset),
+            TempStart.Y);
+
+        TempControl2 = new Point(
+            TempEnd.X - (dx >= 0 ? offset : -offset),
+            TempEnd.Y);
+    }
+
+
+    public bool TryMoveNode(NodeViewModel node, double newX, double newY)
+    {
+        var appWindow = Application.Current.MainWindow;
+
+        if (appWindow == null)
+            return false;
+
+        var maxX = appWindow.ActualWidth;
+        var maxY = appWindow.ActualHeight;
+
+        if (newX < 0 || newY < 0 ||
+            newX + node.Width > maxX ||
+            newY + node.Height > maxY)
         {
-            var connection = Connections[i];
-            connection.BuildRoute();
-            connection.BuildArrow();
+            return false;
         }
+
+        if (IsOverlapping(node, newX, newY))
+            return false;
+
+        node.X = newX;
+        node.Y = newY;
+        return true;
     }
 
-    private void Subscribe(NodeViewModel node)
+    private bool IsOverlapping(NodeViewModel nodeToCheck, double newX, double newY)
     {
-        node.Connectors.CollectionChanged += (_, _) => RebuildAll();
-        node.PropertyChanged += (_, e) =>
+        foreach (var node in Nodes)
         {
-            if (e.PropertyName is "X" or "Y") RebuildAll();
-        };
+            if (node == nodeToCheck)
+                continue;
+
+            var overlapX = newX < node.X + node.Width && newX + nodeToCheck.Width > node.X;
+            var overlapY = newY < node.Y + node.Height && newY + nodeToCheck.Height > node.Y;
+
+            if (overlapX && overlapY)
+                return true;
+        }
+        return false;
     }
 }
-

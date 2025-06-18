@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
         <Rectangle
             Grid.Row="0"
-            Fill="#AAF"
+            Fill="#BF000000"
             Stroke="Black"
             StrokeThickness="1" />
         <Canvas Grid.Row="1">

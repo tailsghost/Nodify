@@ -1,63 +1,56 @@
 ﻿using Nodify.ViewModels.Base;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Nodify.ViewModels;
 
 public class ConnectionViewModel : BaseViewModel
 {
-    public ConnectorViewModel Sourse { get; }
+    public ConnectorViewModel Source { get; }
     public ConnectorViewModel Target { get; }
 
-    private PointCollection _points;
-    public PointCollection Points
+    public PointCollection Points { get; private set; }
+    public Point StartPoint => new(Source.X, Source.Y);
+    public Point EndPoint => new(Target.X, Target.Y);
+
+    public Point ControlPoint1
     {
-        get => _points;
-        set
+        get
         {
-            _points = value;
-            OnPropertyChanged(nameof(Points));
+            var dx = EndPoint.X - StartPoint.X;
+            var offset = Math.Abs(dx) * 0.3;
+            return new(StartPoint.X + (dx >= 0 ? offset : -offset), StartPoint.Y);
         }
     }
 
-    private PointCollection _arrow;
-
-    public PointCollection ArrowPoints
+    public Point ControlPoint2
     {
-        get => _arrow;
-        set
+        get
         {
-            _arrow = value;
-            OnPropertyChanged(nameof(ArrowPoints));
+            var dx = EndPoint.X - StartPoint.X;
+            var offset = Math.Abs(dx) * 0.3;
+            return new(EndPoint.X - (dx >= 0 ? offset : -offset), EndPoint.Y);
         }
     }
 
-    public ConnectionViewModel(ConnectorViewModel a, ConnectorViewModel b)
+    public ConnectionViewModel(ConnectorViewModel source, ConnectorViewModel target)
     {
-        Sourse = a;
-        Target = b;
-        BuildRoute();
-        BuildArrow();
+        Source = source;
+        Target = target;
+        Source.PropertyChanged += (_, _) => Update();
+        Target.PropertyChanged += (_, _) => Update();
+        Update();
     }
-
-    public void BuildRoute()
+    public void Update()
     {
-        var p1 = new Point(Sourse.X, Sourse.Y);
-        var p2 = new Point(Target.X, Target.Y);
-        Points = [p1, new Point(p2.X, p1.Y), p2];
-    }
-    public void BuildArrow()
-    {
-        if (Points.Count < 2) return;
-        var end = Points[^1];
-        var prev = Points[^2];
-        var dir = end - prev;
-        if(dir.Length < 0.1)return;
-        dir.Normalize();
-        double L = 12, W = 6;
-        var basePt = end - dir * L;
-        var perp = new Vector(-dir.Y, dir.X) * (W / 2);
-        ArrowPoints = [end, basePt + perp, basePt - perp];
+        OnPropertyChanged(nameof(StartPoint));
+        OnPropertyChanged(nameof(EndPoint));
+        var mid = new Point(EndPoint.X, StartPoint.Y);
+        Points = new PointCollection { StartPoint, mid, EndPoint };
+        OnPropertyChanged(nameof(Points));
+        OnPropertyChanged(nameof(ControlPoint1));
+        OnPropertyChanged(nameof(ControlPoint2));
     }
 }
 

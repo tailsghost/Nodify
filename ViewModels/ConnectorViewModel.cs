@@ -17,8 +17,8 @@ public class ConnectorViewModel : BaseViewModel
 
     public double X
         => Parent.X
-           + (Parent.Width * (Index + 1) / (Parent.Connectors.Count + 1))
-           - ConnectorSize / 2;
+           + (Parent.Width / (Index + 1) / (Parent.Connectors.Count))
+           - ConnectorSize * 1.5;
 
     public double Y
         => Parent.Y

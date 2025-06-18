@@ -7,15 +7,18 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
-        <Polyline
-            Points="{Binding Points}"
-            Stroke="DarkBlue"
-            StrokeThickness="2" />
-        <Polygon
-            Fill="DarkBlue"
-            Points="{Binding ArrowPoints}"
-            Stroke="DarkBlue"
-            StrokeThickness="1" />
-    </Grid>
+    <Canvas Panel.ZIndex="0">
+        <Path Stroke="DarkBlue" StrokeThickness="2">
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="{Binding StartPoint}">
+                        <BezierSegment
+                            Point1="{Binding ControlPoint1}"
+                            Point2="{Binding ControlPoint2}"
+                            Point3="{Binding EndPoint}" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
+    </Canvas>
 </UserControl>
