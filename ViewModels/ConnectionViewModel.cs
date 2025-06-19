@@ -48,7 +48,6 @@ public class ConnectionViewModel : BaseViewModel
     {
         Source = source;
         Target = target;
-        Source.Color = Target.Color;
         Source.PropertyChanged += (_, _) => Update();
         Target.PropertyChanged += (_, _) => Update();
         Update();
