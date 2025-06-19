@@ -10,8 +10,8 @@
     mc:Ignorable="d">
     <Grid>
         <Canvas
-            Name="SpaceCanvas"
-            Background="#EEE"
+            x:Name="SpaceCanvas"
+            Background="SlateGray"
             MouseLeftButtonDown="SpaceCanvas_OnMouseLeftButtonDown"
             MouseLeftButtonUp="SpaceCanvas_OnMouseLeftButtonUp"
             MouseMove="SpaceCanvas_OnMouseMove"
@@ -30,16 +30,16 @@
             </ItemsControl>
             <Path
                 IsHitTestVisible="False"
-                Visibility="{Binding ViewModel.IsDragging, Converter={StaticResource BoolToVisibilityConverter}}"
-                Stroke="Gray"
-                StrokeThickness="2">
+                Stroke="Beige"
+                StrokeThickness="2"
+                Visibility="{Binding ViewModel.IsDragging, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Path.Data>
                     <PathGeometry>
                         <PathFigure StartPoint="{Binding ViewModel.TempStart, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                             <BezierSegment
                                 Point1="{Binding ViewModel.TempControl1, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
                                 Point2="{Binding ViewModel.TempControl2, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
-                                Point3="{Binding ViewModel.TempEnd,     RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
+                                Point3="{Binding ViewModel.TempEnd, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
                         </PathFigure>
                     </PathGeometry>
                 </Path.Data>

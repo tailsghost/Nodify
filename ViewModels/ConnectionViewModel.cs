@@ -1,6 +1,5 @@
 ﻿using Nodify.ViewModels.Base;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Nodify.ViewModels;
@@ -13,6 +12,17 @@ public class ConnectionViewModel : BaseViewModel
     public PointCollection Points { get; private set; }
     public Point StartPoint => new(Source.X, Source.Y);
     public Point EndPoint => new(Target.X, Target.Y);
+
+
+    public SolidColorBrush StrokeBrush
+    {
+        get
+        {
+            var b = new SolidColorBrush(Target.Color);
+            b.Opacity = 0.8;
+            return b;
+        }
+    }
 
     public Point ControlPoint1
     {
@@ -38,6 +48,7 @@ public class ConnectionViewModel : BaseViewModel
     {
         Source = source;
         Target = target;
+        Source.Color = Target.Color;
         Source.PropertyChanged += (_, _) => Update();
         Target.PropertyChanged += (_, _) => Update();
         Update();

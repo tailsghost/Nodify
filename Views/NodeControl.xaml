@@ -5,61 +5,82 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Width="{Binding Width}"
-    Height="{Binding Height, Converter={StaticResource HeightWithConnectorsConverter}, ConverterParameter=44}"
+    Height="{Binding Height, Converter={StaticResource HeightWithConnectorsConverter}, ConverterParameter=0}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Height}" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="24" />
         </Grid.RowDefinitions>
-        <Rectangle
-            Grid.Row="0"
-            Fill="#BF000000"
-            Stroke="Black"
-            StrokeThickness="1" />
-        <Canvas Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding Connectors}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Ellipse
-                            Canvas.Left="{Binding X}"
-                            Canvas.Top="{Binding Y}"
-                            Width="10"
-                            Height="10"
-                            Fill="White"
-                            PreviewMouseLeftButtonDown="OnConnectorMouseDown"
-                            PreviewMouseLeftButtonUp="OnConnectorMouseUp"
-                            Stroke="Black"
-                            StrokeThickness="1"
-                            Tag="{Binding}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Canvas>
-        <StackPanel
-            Grid.Row="2"
-            Margin="0,4,0,0"
-            HorizontalAlignment="Center"
-            Orientation="Horizontal">
-            <Button
-                Width="12"
-                Height="12"
-                Margin="2"
-                Command="{Binding AddConnectorCmd}"
-                Content="+" />
-            <Button
-                Width="12"
-                Height="12"
-                Command="{Binding RemoveConnectorCmd}"
-                Content="-" />
-        </StackPanel>
+        <Border
+            x:Name="Node"
+            Background="#BF000000"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="55" />
+                </Grid.ColumnDefinitions>
+                <ItemsControl ItemsSource="{Binding Inputs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel VerticalAlignment="Top" Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Ellipse
+                                    Width="{Binding ConnectorSize}"
+                                    Height="{Binding ConnectorSize}"
+                                    Margin="0,5"
+                                    Fill="{Binding Brush}"
+                                    PreviewMouseLeftButtonDown="OnConnectorMouseDown"
+                                    PreviewMouseLeftButtonUp="OnConnectorMouseUp"
+                                    Stroke="Black"
+                                    StrokeThickness="1"
+                                    Tag="{Binding}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    Foreground="Beige"
+                                    Text="{Binding Name}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ItemsControl Grid.Column="2" ItemsSource="{Binding Outputs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel VerticalAlignment="Top" Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    Foreground="Beige"
+                                    Text="{Binding Name}" />
+                                <Ellipse
+                                    Width="{Binding ConnectorSize}"
+                                    Height="{Binding ConnectorSize}"
+                                    Margin="0,5"
+                                    Fill="{Binding Brush}"
+                                    PreviewMouseLeftButtonDown="OnConnectorMouseDown"
+                                    PreviewMouseLeftButtonUp="OnConnectorMouseUp"
+                                    Stroke="Black"
+                                    StrokeThickness="1"
+                                    Tag="{Binding}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

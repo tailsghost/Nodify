@@ -2,7 +2,6 @@
 using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -12,8 +11,8 @@ public class NodeSpaceViewModel : BaseViewModel
     private ConnectorViewModel _dragStart;
     private Point _mousePos;
 
-    public ObservableCollection<NodeViewModel> Nodes { get; } = new();
-    public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
+    public ObservableCollection<NodeViewModel> Nodes { get; } = [];
+    public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
 
     public ICommand AddNodeCmd { get; }
 
@@ -38,7 +37,7 @@ public class NodeSpaceViewModel : BaseViewModel
         set
         {
             _tempStart = value;
-            OnPropertyChanged(nameof(TempStart));
+            OnPropertyChanged();
             OnPropertyChanged(nameof(TempLine));
         }
     }
@@ -50,7 +49,7 @@ public class NodeSpaceViewModel : BaseViewModel
         set
         {
             _tempEnd = value;
-            OnPropertyChanged(nameof(TempEnd));
+            OnPropertyChanged();
             OnPropertyChanged(nameof(TempLine));
         }
     }
@@ -62,7 +61,7 @@ public class NodeSpaceViewModel : BaseViewModel
         set
         {
             _isDragging = value;
-            OnPropertyChanged(nameof(IsDragging));
+            OnPropertyChanged();
         }
     }
 
@@ -74,7 +73,7 @@ public class NodeSpaceViewModel : BaseViewModel
         {
             if (_tempControl1 == value) return;
             _tempControl1 = value;
-            OnPropertyChanged(nameof(TempControl1));
+            OnPropertyChanged();
         }
     }
 
@@ -87,24 +86,23 @@ public class NodeSpaceViewModel : BaseViewModel
             if (_tempControl2 != value)
             {
                 _tempControl2 = value;
-                OnPropertyChanged(nameof(TempControl2));
+                OnPropertyChanged();
             }
         }
     }
-
-    public double CurveOffset => System.Math.Abs(TempEnd.X - TempStart.X) * 0.25;
 
     public NodeSpaceViewModel()
     {
         Nodes.Add(new NodeViewModel("A", 50, 100));
         Nodes.Add(new NodeViewModel("B", 250, 150));
         Nodes.Add(new NodeViewModel("C", 450, 250));
+        Nodes.Add(new NodeViewModel("C", 600, 225));
 
         AddNodeCmd = new RelayCommand(p =>
         {
             if (p is not Point pt) return;
             var nm = $"N{Nodes.Count + 1}";
-            var node = new NodeViewModel(nm, pt.X - 40, pt.Y - 25);
+            var node = new NodeViewModel(nm, pt.X, pt.Y);
             if (!IsOverlapping(node, node.X, node.Y))
             {
                 Nodes.Add(node);
@@ -137,28 +135,46 @@ public class NodeSpaceViewModel : BaseViewModel
 
     public void EndDrag(ConnectorViewModel c)
     {
-        if (_dragStart != null && c != null)
-            Connections.Add(new ConnectionViewModel(_dragStart, c));
+        if (_dragStart == null || c == null)
+        {
+            ResetDrag();
+            return;
+        }
 
-        _dragStart = null;
-        IsDragging = false;
-        TempStart = TempEnd = new Point();
-        UpdateTempBezier();
-    }
+        if (_dragStart.IsInput == c.IsInput)
+        {
+            ResetDrag();
+            return;
+        }
 
+        var source = _dragStart.IsInput ? _dragStart : c;
+        var target = _dragStart.IsInput ? c : _dragStart;
 
-    private void UpdateTempBezier()
-    {
-        var dx = TempEnd.X - TempStart.X;
-        var offset = Math.Abs(dx) * 0.1;
+        if (source.Parent == target.Parent)
+        {
+            ResetDrag();
+            return;
+        }
 
-        TempControl1 = new Point(
-            TempStart.X + (dx >= 0 ? offset : -offset),
-            TempStart.Y);
+        if (target.IsInput && Connections.Any(conn => conn.Target == target))
+        {
+            ResetDrag();
+            return;
+        }
 
-        TempControl2 = new Point(
-            TempEnd.X - (dx >= 0 ? offset : -offset),
-            TempEnd.Y);
+        if (target.IsConnected)
+        {
+            ResetDrag();
+            return;
+        }
+
+        var connection = new ConnectionViewModel(source, target);
+        source.Connection = connection;
+        target.Connection = connection;
+
+        Connections.Add(connection);
+
+        ResetDrag();
     }
 
 
@@ -201,5 +217,28 @@ public class NodeSpaceViewModel : BaseViewModel
                 return true;
         }
         return false;
+    }
+
+    private void UpdateTempBezier()
+    {
+        var dx = TempEnd.X - TempStart.X;
+        var offset = Math.Abs(dx) * 0.1;
+
+        TempControl1 = new Point(
+            TempStart.X + (dx >= 0 ? offset : -offset),
+            TempStart.Y);
+
+        TempControl2 = new Point(
+            TempEnd.X - (dx >= 0 ? offset : -offset),
+            TempEnd.Y);
+    }
+
+    private void ResetDrag()
+    {
+        _dragStart = null;
+        IsDragging = false;
+        TempStart = TempEnd = new Point();
+        UpdateTempBezier();
+        OnPropertyChanged(nameof(TempLine));
     }
 }

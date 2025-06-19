@@ -1,13 +1,14 @@
-﻿using Nodify.Helpers;
-using Nodify.ViewModels.Base;
+﻿using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Nodify.ViewModels
 {
     public class NodeViewModel : BaseViewModel
     {
         private double _x, _y;
+
         public double X
         {
             get => _x;
@@ -15,11 +16,11 @@ namespace Nodify.ViewModels
             {
                 if (_x == value) return;
                 _x = value;
-                OnPropertyChanged(nameof(X));
-                foreach (var c in Connectors)
-                    c.RaiseChanged();
+                OnPropertyChanged();
+                RaiseConnectorPositionsChanged();
             }
         }
+
         public double Y
         {
             get => _y;
@@ -27,21 +28,18 @@ namespace Nodify.ViewModels
             {
                 if (_y == value) return;
                 _y = value;
-                OnPropertyChanged(nameof(Y));
-                foreach (var c in Connectors)
-                    c.RaiseChanged();
+                OnPropertyChanged();
+                RaiseConnectorPositionsChanged();
             }
         }
 
-        public double Width { get; } = 80;
-        public double Height { get; } = 50;
+        public double Width { get; init; }
+        public double Height { get; init; }
 
         public string Name { get; }
 
-        public ObservableCollection<ConnectorViewModel> Connectors { get; } = [];
-
-        public ICommand AddConnectorCmd { get; }
-        public ICommand RemoveConnectorCmd { get; }
+        public ObservableCollection<ConnectorViewModel> Inputs { get; } = [];
+        public ObservableCollection<ConnectorViewModel> Outputs { get; } = [];
 
         public NodeViewModel(string name, double x, double y)
         {
@@ -49,25 +47,42 @@ namespace Nodify.ViewModels
             Y = y;
             Name = name;
 
-            Connectors.Add(new ConnectorViewModel(this, 0));
-            Connectors.Add(new ConnectorViewModel(this, 1));
+            Inputs.Add(new ConnectorViewModel(this, 0,12, true, "Вход 1"));
+            Inputs.Add(new ConnectorViewModel(this, 1,12, true, "Вход 2"));
 
-            AddConnectorCmd = new RelayCommand(_ => Add(), _ => Connectors.Count < 10);
-            RemoveConnectorCmd = new RelayCommand(_ => Remove(), _ => Connectors.Count > 2);
+            Outputs.Add(new ConnectorViewModel(this, 0, 12, false, "Выход 1"));
+            Outputs.Add(new ConnectorViewModel(this, 1, 12, false, "Выход 2"));
 
-            Connectors.CollectionChanged += (_, _) =>
-            {
-                for (var i = 0; i < Connectors.Count; i++)
-                    Connectors[i].Index = i;
+            Width = 130;
+            Height = CalculateHeight(Inputs.Count, Outputs.Count);
 
-                foreach (var c in Connectors)
-                    c.RaiseChanged();
-
-                CommandManager.InvalidateRequerySuggested();
-            };
+            Inputs.CollectionChanged += (_, _) => RefreshIndices(Inputs);
+            Outputs.CollectionChanged += (_, _) => RefreshIndices(Outputs);
         }
 
-        private void Add() => Connectors.Add(new ConnectorViewModel(this, Connectors.Count));
-        private void Remove() => Connectors.RemoveAt(Connectors.Count - 1);
+
+        private double CalculateHeight(int inputs, int outputs)
+        {
+            return inputs >= outputs ? ((inputs * 12) + inputs* 10) : ((outputs * 12) + outputs * 10);
+        }
+
+        private void RefreshIndices(ObservableCollection<ConnectorViewModel> collection)
+        {
+            for (int i = 0; i < collection.Count; i++)
+                collection[i].Index = i;
+
+            foreach (var c in collection)
+                c.RaiseChanged();
+
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void RaiseConnectorPositionsChanged()
+        {
+            foreach (var input in Inputs)
+                input.RaiseChanged();
+            foreach (var output in Outputs)
+                output.RaiseChanged();
+        }
     }
 }

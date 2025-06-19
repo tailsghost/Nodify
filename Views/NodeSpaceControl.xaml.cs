@@ -92,6 +92,7 @@ namespace Nodify.Views
         {
             if (e.OriginalSource is not Ellipse ellipse) return;
             if (ellipse.Tag is not ConnectorViewModel connectorVM) return;
+
             ViewModel.BeginDrag(connectorVM);
             e.Handled = true;
         }
