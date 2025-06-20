@@ -33,6 +33,9 @@ namespace Nodify.ViewModels
             }
         }
 
+        public double DragStartX { get; set; }
+        public double DragStartY { get; set; }
+
         public double Width { get; init; }
         public double Height { get; init; }
 

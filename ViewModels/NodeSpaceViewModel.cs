@@ -8,11 +8,14 @@ using System.Windows.Media;
 
 public class NodeSpaceViewModel : BaseViewModel
 {
+
+
     private ConnectorViewModel _dragStart;
     private Point _mousePos;
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = [];
     public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
+    public ObservableCollection<NodeContainerViewModel> Containers { get; } = [];
 
     public ICommand AddNodeCmd { get; }
 
@@ -178,32 +181,41 @@ public class NodeSpaceViewModel : BaseViewModel
     }
 
 
-    public bool TryMoveNode(NodeViewModel node, double newX, double newY)
+    public bool TryMoveNode(NodeViewModel node,double maxX, double maxY, double newX, double newY)
     {
-        var appWindow = Application.Current.MainWindow;
+        var clampedX = Math.Max(0, Math.Min(newX, maxX - node.Width));
+        var clampedY = Math.Max(0, Math.Min(newY, maxY - node.Height));
 
-        if (appWindow == null)
-            return false;
-
-        var maxX = appWindow.ActualWidth;
-        var maxY = appWindow.ActualHeight;
-
-        if (newX < 0 || newY < 0 ||
-            newX + node.Width > maxX ||
-            newY + node.Height > maxY)
-        {
-            return false;
-        }
-
-        if (IsOverlapping(node, newX, newY))
-            return false;
-
-        node.X = newX;
-        node.Y = newY;
+        node.X = clampedX;
+        node.Y = clampedY;
         return true;
     }
 
-    private bool IsOverlapping(NodeViewModel nodeToCheck, double newX, double newY)
+    public (double X, double Y) FindSafePosition(
+        NodeViewModel node,
+        int STEPS,
+        double startX, double startY,
+        double endX, double endY)
+    {
+        double safeX = startX, safeY = startY;
+
+        for (var i = 1; i <= STEPS; i++)
+        {
+            var t = i / (double)STEPS;
+            var testX = startX + (endX - startX) * t;
+            var testY = startY + (endY - startY) * t;
+
+            if (IsOverlapping(node, testX, testY))
+                break;
+
+            safeX = testX;
+            safeY = testY;
+        }
+
+        return (safeX, safeY);
+    }
+
+    public bool IsOverlapping(NodeViewModel nodeToCheck, double newX, double newY)
     {
         foreach (var node in Nodes)
         {

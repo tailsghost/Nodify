@@ -5,18 +5,77 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Nodify.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Nodify.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    Background="Transparent"
+    PreviewMouseWheel="OnPreviewMouseWheel"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  фон в виде сетки  -->
+        <DrawingBrush
+            x:Key="GridBrush"
+            TileMode="Tile"
+            Viewport="0,0,25,25"
+            ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="#555" Thickness="1" />
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,0" EndPoint="0,25" />
+                            <LineGeometry StartPoint="0,0" EndPoint="25,0" />
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </UserControl.Resources>
+
     <Grid>
         <Canvas
             x:Name="SpaceCanvas"
-            Background="SlateGray"
-            MouseLeftButtonDown="SpaceCanvas_OnMouseLeftButtonDown"
-            MouseLeftButtonUp="SpaceCanvas_OnMouseLeftButtonUp"
-            MouseMove="SpaceCanvas_OnMouseMove"
-            MouseRightButtonUp="SpaceCanvas_OnMouseRightButtonUp">
-            <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}">
+            Width="5000"
+            Height="2500"
+            Background="{StaticResource GridBrush}"
+            MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+            MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+            MouseMove="Canvas_MouseMove"
+            MouseRightButtonUp="Canvas_MouseRightButtonUp"
+            SnapsToDevicePixels="True">
+
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="SpaceScale" ScaleX="1" ScaleY="1" />
+                    <TranslateTransform x:Name="SpaceTranslate" X="0" Y="0" />
+                </TransformGroup>
+            </Canvas.RenderTransform>
+
+            <ItemsControl ItemsSource="{Binding ViewModel.Containers, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:NodeContainerViewModel}">
+                        <!-- Теперь это наш отдельный UserControl -->
+                        <local:NodeContainerControl />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top"  Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+
+            <!--  Линии связей  -->
+            <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas />
@@ -28,6 +87,8 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <!--  Подтягивающаяся кривая при drag’n’drop  -->
             <Path
                 IsHitTestVisible="False"
                 Stroke="Beige"
@@ -44,7 +105,9 @@
                     </PathGeometry>
                 </Path.Data>
             </Path>
-            <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType={x:Type local:NodeSpaceControl}}}">
+
+            <!--  Ноды  -->
+            <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas />
@@ -65,6 +128,7 @@
                     </Style>
                 </ItemsControl.ItemContainerStyle>
             </ItemsControl>
+
         </Canvas>
     </Grid>
 </UserControl>
