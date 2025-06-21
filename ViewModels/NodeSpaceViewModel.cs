@@ -118,12 +118,10 @@ public class NodeSpaceViewModel : BaseViewModel
     {
         _dragStart = c;
         IsDragging = true;
-        if (c != null)
-        {
-            TempStart = new Point(c.X, c.Y);
-            TempEnd = TempStart;
-            UpdateTempBezier();
-        }
+        if (c == null) return;
+        TempStart = new Point(c.X, c.Y);
+        TempEnd = TempStart;
+        UpdateTempBezier();
     }
 
     public void UpdateDrag(Point p)

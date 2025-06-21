@@ -2,18 +2,21 @@
     x:Class="Nodify.Views.NodeContainerControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:vm="clr-namespace:Nodify.ViewModels"
     x:Name="Root">
-    <Border
-        Width="{Binding Width}"
-        Height="{Binding Height}"
-        Background="#330099cc"
-        BorderBrush="LightBlue"
-        BorderThickness="2"
-        ToolTip="{Binding Name}">
-        <TextBlock
-            Margin="2"
-            Foreground="White"
-            Text="{Binding Name}" />
-    </Border>
+    <Grid ZIndex="50">
+        <Border
+            Width="{Binding Width}"
+            Height="{Binding Height}"
+            Background="#330099cc"
+            BorderBrush="LightBlue"
+            BorderThickness="2"
+            PreviewMouseLeftButtonDown="OnNodeContainerMouseDown"
+            Tag="{Binding}"
+            ToolTip="{Binding Name}">
+            <TextBlock
+                Margin="2"
+                Foreground="White"
+                Text="{Binding Name}" />
+        </Border>
+    </Grid>
 </UserControl>

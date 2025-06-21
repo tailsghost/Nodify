@@ -13,7 +13,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--  фон в виде сетки  -->
         <DrawingBrush
             x:Key="GridBrush"
             TileMode="Tile"
@@ -35,11 +34,12 @@
         </DrawingBrush>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="#0D0D0D">
         <Canvas
             x:Name="SpaceCanvas"
             Width="5000"
             Height="2500"
+            Margin="5"
             Background="{StaticResource GridBrush}"
             MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
             MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
@@ -57,24 +57,26 @@
             <ItemsControl ItemsSource="{Binding ViewModel.Containers, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas/>
+                        <Canvas />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:NodeContainerViewModel}">
-                        <!-- Теперь это наш отдельный UserControl -->
-                        <local:NodeContainerControl />
+                        <local:NodeContainerControl
+                            Panel.ZIndex="10"
+                            NodeContainerMouseDown="NodeControl_OnNodeContainerMouseDown"
+                            NodeContainerMouseUp="NodeControl_OnNodeContainerMouseUp"
+                            NodeContainerMove="NodeControl_OnNodeContainerMove" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>
                     <Style TargetType="ContentPresenter">
                         <Setter Property="Canvas.Left" Value="{Binding X}" />
-                        <Setter Property="Canvas.Top"  Value="{Binding Y}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
                     </Style>
                 </ItemsControl.ItemContainerStyle>
             </ItemsControl>
 
-            <!--  Линии связей  -->
             <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -83,16 +85,15 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:ConnectionControl DataContext="{Binding}" />
+                        <local:ConnectionControl Panel.ZIndex="20" DataContext="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!--  Подтягивающаяся кривая при drag’n’drop  -->
             <Path
                 IsHitTestVisible="False"
                 Stroke="Beige"
-                StrokeThickness="2"
+                StrokeThickness="3"
                 Visibility="{Binding ViewModel.IsDragging, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Path.Data>
                     <PathGeometry>
@@ -106,7 +107,6 @@
                 </Path.Data>
             </Path>
 
-            <!--  Ноды  -->
             <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -116,9 +116,13 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <local:NodeControl
+                            Panel.ZIndex="100"
                             ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
                             ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
-                            DataContext="{Binding}" />
+                            DataContext="{Binding}"
+                            NodeMouseMove="NodeControl_OnNodeMove"
+                            NodeMouseMoveDown="NodeControl_OnNodeMouseDown"
+                            NodeMouseMoveUp="NodeControl_OnNodeMouseUp" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>

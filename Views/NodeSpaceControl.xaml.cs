@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using Nodify.Helpers;
+using Nodify.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Nodify.Helpers;
-using Nodify.ViewModels;
 
 namespace Nodify.Views
 {
@@ -31,6 +30,7 @@ namespace Nodify.Views
         private NodeContainerViewModel? _dragContainer;
         private Point _dragContMouseStart;
         private double _dragContStartX, _dragContStartY;
+        private Vector _dragContPointerOffset;
 
         public NodeSpaceControl()
         {
@@ -79,33 +79,6 @@ namespace Nodify.Views
                 return;
             }
 
-            foreach (var cvm in ViewModel.Containers.Reverse<NodeContainerViewModel>())
-            {
-                if (!(pos.X >= cvm.X) || !(pos.X <= cvm.X + cvm.Width)
-                                      || !(pos.Y >= cvm.Y) || !(pos.Y <= cvm.Y + cvm.Height)) continue;
-                _dragContainer = cvm;
-                _dragContMouseStart = pos;
-                _dragContStartX = cvm.X;
-                _dragContStartY = cvm.Y;
-                SpaceCanvas.CaptureMouse();
-                e.Handled = true;
-                return;
-            }
-
-            var hit = VisualTreeHelper.HitTest(SpaceCanvas, pos)?.VisualHit;
-            var nodeCtrl = FindAncestorHelper.FindAncestor<NodeControl>(hit);
-            if (nodeCtrl?.DataContext is NodeViewModel nvm)
-            {
-                _dragNode = nvm;
-                _initialMouse = pos;
-                _initialNodePos = new Point(nvm.X, nvm.Y);
-                nvm.DragStartX = nvm.X;
-                nvm.DragStartY = nvm.Y;
-                SpaceCanvas.CaptureMouse();
-                e.Handled = true;
-                return;
-            }
-
             ViewModel.BeginDrag(null);
         }
 
@@ -140,32 +113,18 @@ namespace Nodify.Views
                 return;
             }
 
-            if (_dragContainer != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                var delta = pos - _dragContMouseStart;
-                _dragContainer.X = _dragContStartX + delta.X;
-                _dragContainer.Y = _dragContStartY + delta.Y;
-                return;
-            }
-
-            if (_dragNode != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                var dx = pos.X - _initialMouse.X;
-                var dy = pos.Y - _initialMouse.Y;
-                ViewModel.TryMoveNode(
-                    _dragNode,
-                    SpaceCanvas.ActualWidth, SpaceCanvas.ActualHeight,
-                    _initialNodePos.X + dx, _initialNodePos.Y + dy
-                );
-                e.Handled = true;
-                return;
-            }
-
             ViewModel.UpdateDrag(pos);
         }
 
         private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (_dragContainer != null)
+            {
+                _dragContainer = null;
+                e.Handled = true;
+                return;
+            }
+
             if (_isCreatingContainer)
             {
                 _isCreatingContainer = false;
@@ -198,39 +157,11 @@ namespace Nodify.Views
                 SpaceCanvas.ReleaseMouseCapture();
             }
 
-            if (_dragContainer != null)
-            {
-                _dragContainer = null;
-                SpaceCanvas.ReleaseMouseCapture();
-                e.Handled = true;
-                return;
-            }
-
-            if (_dragNode != null)
-            {
-                if (ViewModel.IsOverlapping(_dragNode, _dragNode.X, _dragNode.Y))
-                {
-                    var (sx, sy) = ViewModel.FindSafePosition(
-                        _dragNode, STEPS,
-                        _dragNode.DragStartX, _dragNode.DragStartY,
-                        _dragNode.X, _dragNode.Y
-                    );
-                    _dragNode.X = sx;
-                    _dragNode.Y = sy;
-                }
-                _dragNode = null;
-                SpaceCanvas.ReleaseMouseCapture();
-                e.Handled = true;
-                return;
-            }
-
             ViewModel.EndDrag(null);
         }
 
         private void Canvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ViewModel.AddNodeCmd.Execute(e.GetPosition(SpaceCanvas));
-        }
+            => ViewModel.AddNodeCmd.Execute(e.GetPosition(SpaceCanvas));
 
         private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
@@ -257,16 +188,169 @@ namespace Nodify.Views
 
         private void NodeControl_OnConnectorMouseDown(object sender, RoutedEventArgs e)
         {
-            if (e.OriginalSource is not Ellipse ell || ell.Tag is not ConnectorViewModel cvm) return;
+            if (e.OriginalSource is not Ellipse { Tag: ConnectorViewModel cvm }) return;
             ViewModel.BeginDrag(cvm);
             e.Handled = true;
         }
 
         private void NodeControl_OnConnectorMouseUp(object sender, RoutedEventArgs e)
         {
-            if (e.OriginalSource is not Ellipse ell || ell.Tag is not ConnectorViewModel cvm) return;
+            if (e.OriginalSource is not Ellipse { Tag: ConnectorViewModel cvm }) return;
             ViewModel.EndDrag(cvm);
+
             e.Handled = true;
+        }
+
+        private void NodeControl_OnNodeMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not NodeControl ctl) return;
+            if (ctl.DataContext is not NodeViewModel cvm) return;
+            var pos = e.GetPosition(SpaceCanvas);
+            _dragNode = cvm;
+            _initialMouse = pos;
+            _initialNodePos = new Point(cvm.X, cvm.Y);
+            cvm.DragStartX = cvm.X;
+            cvm.DragStartY = cvm.Y;
+            e.Handled = true;
+        }
+
+        private void NodeControl_OnNodeMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not NodeControl ctl) return;
+            if (ctl.DataContext is not NodeViewModel node) return;
+            if (_dragNode == null) return;
+
+            // 1) Сначала убираем ноду из всех контейнеров, в которых она могла быть
+            bool wasInAny = false;
+            foreach (var container in ViewModel.Containers)
+            {
+                if (container.Nodes.Contains(_dragNode))
+                {
+                    container.Nodes.Remove(_dragNode);
+                    wasInAny = true;
+                }
+            }
+
+            // 2) Если перекрытие было, сдвигаем обратно
+            if (ViewModel.IsOverlapping(_dragNode, _dragNode.X, _dragNode.Y))
+            {
+                var (sx, sy) = ViewModel.FindSafePosition(
+                    _dragNode, STEPS,
+                    _dragNode.DragStartX, _dragNode.DragStartY,
+                    _dragNode.X, _dragNode.Y
+                );
+                _dragNode.X = sx;
+                _dragNode.Y = sy;
+            }
+
+            // 3) Пробуем добавить в новый контейнер
+            bool added = false;
+            foreach (var container in ViewModel.Containers)
+            {
+                var rect = new Rect(container.X, container.Y, container.Width, container.Height);
+                var nodeRect = new Rect(_dragNode.X, _dragNode.Y, _dragNode.Width, _dragNode.Height);
+
+                if (!rect.Contains(nodeRect))
+                    continue;
+
+                container.Nodes.Add(_dragNode);
+                added = true;
+                break;
+            }
+
+            // 4) Если раньше была в каком-то контейнере, а теперь не попала ни в один — разрываем все связи
+            if (wasInAny && !added)
+            {
+                // Собираем все уникальные подключения
+                var toDisconnect = new List<ConnectionViewModel>();
+                foreach (var input in _dragNode.Inputs)
+                {
+                    if (input.Connection != null && !toDisconnect.Contains(input.Connection))
+                        toDisconnect.Add(input.Connection);
+                }
+                foreach (var output in _dragNode.Outputs)
+                {
+                    if (output.Connection != null && !toDisconnect.Contains(output.Connection))
+                        toDisconnect.Add(output.Connection);
+                }
+
+                // Разрываем каждую связь: чистим обе стороны и удаляем из глобального списка ViewModel.Connections
+                foreach (var conn in toDisconnect)
+                {
+                    if (conn.Source.Connection == conn)
+                        conn.Source.Connection = null;
+                    if (conn.Target.Connection == conn)
+                        conn.Target.Connection = null;
+
+                    // Предполагаем, что все связи хранятся в коллекции ViewModel.Connections
+                    if (ViewModel.Connections.Contains(conn))
+                        ViewModel.Connections.Remove(conn);
+                }
+            }
+
+            // 5) Завершаем перетаскивание
+            _dragNode = null;
+            SpaceCanvas.ReleaseMouseCapture();
+            e.Handled = true;
+        }
+
+        private void NodeControl_OnNodeMove(object sender, MouseEventArgs e)
+        {
+            if (sender is not NodeControl ctl) return;
+            if (ctl.DataContext is not NodeViewModel cvm) return;
+            if (_dragNode == null || e.LeftButton != MouseButtonState.Pressed) return;
+            var pos = e.GetPosition(SpaceCanvas);
+            var dx = pos.X - _initialMouse.X;
+            var dy = pos.Y - _initialMouse.Y;
+            ViewModel.TryMoveNode(
+                _dragNode,
+                SpaceCanvas.ActualWidth, SpaceCanvas.ActualHeight,
+                _initialNodePos.X + dx, _initialNodePos.Y + dy
+            );
+            e.Handled = true;
+            return;
+        }
+
+        private void NodeControl_OnNodeContainerMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not NodeContainerControl ctl) return;
+
+            if (ctl.DataContext is not NodeContainerViewModel cvm) return;
+
+            var pos = e.GetPosition(SpaceCanvas);
+
+            _dragContainer = cvm;
+            _dragContMouseStart = pos;
+            _dragContStartX = cvm.X;
+            _dragContStartY = cvm.Y;
+            _dragContainer.CacheNodePositions();
+            ctl.CaptureMouse();
+            e.Handled = true;
+        }
+
+
+        private void NodeControl_OnNodeContainerMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not NodeContainerControl ctl) return;
+
+            var cvm = ctl.DataContext as NodeContainerViewModel;
+            if (cvm == null) return;
+
+            _dragContainer = null;
+            e.Handled = true;
+        }
+
+        private void NodeControl_OnNodeContainerMove(object sender, MouseEventArgs e)
+        {
+            if (sender is not NodeContainerControl ctl) return;
+
+            if (ctl.DataContext is not NodeContainerViewModel cvm) return;
+            if (_dragContainer == null || e.LeftButton != MouseButtonState.Pressed) return;
+            var pos = e.GetPosition(SpaceCanvas);
+            var delta = pos - _dragContMouseStart;
+
+            _dragContainer.NodesRaiseChanged(_dragContStartX, delta.X, _dragContStartY, delta.Y);
+            return;
         }
     }
 }

@@ -20,7 +20,7 @@ public class ConnectorViewModel : BaseViewModel
         get => _connection;
         set
         {
-            if (_connection == value || _connection != null) return;
+            if (_connection == value) return;
             _connection = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsConnected));
@@ -115,6 +115,7 @@ public class ConnectorViewModel : BaseViewModel
         OnPropertyChanged(nameof(X));
         OnPropertyChanged(nameof(Y));
     }
+
 
     private static Color RandomColor()
     {
