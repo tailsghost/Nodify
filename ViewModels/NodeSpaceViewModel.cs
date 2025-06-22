@@ -5,7 +5,6 @@ using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 
 public class NodeSpaceViewModel : BaseViewModel
 {

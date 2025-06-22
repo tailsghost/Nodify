@@ -1,6 +1,5 @@
 ﻿using Nodify.Models;
 using Nodify.ViewModels.Base;
-using System.Data.Common;
 using System.Windows.Media;
 
 namespace Nodify.ViewModels;
