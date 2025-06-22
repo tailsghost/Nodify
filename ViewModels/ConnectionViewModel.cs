@@ -1,4 +1,6 @@
-﻿using Nodify.ViewModels.Base;
+﻿using Nodify.Models;
+using Nodify.ViewModels.Base;
+using System.Net;
 using System.Windows;
 using System.Windows.Media;
 
@@ -6,61 +8,44 @@ namespace Nodify.ViewModels;
 
 public class ConnectionViewModel : BaseViewModel
 {
-    public ConnectorViewModel Source { get; }
-    public ConnectorViewModel Target { get; }
+    private readonly EdgeModel _edge;
 
-    public PointCollection Points { get; private set; }
-    public Point StartPoint => new(Source.X, Source.Y);
-    public Point EndPoint => new(Target.X, Target.Y);
-
-
-    public SolidColorBrush StrokeBrush
+    public ConnectionViewModel(EdgeModel e)
     {
-        get
-        {
-            var b = new SolidColorBrush(Target.Color);
-            b.Opacity = 0.8;
-            return b;
-        }
+        _edge = e;
+        _edge.Source.PropertyChanged += (_, _) => Update();
+        _edge.Target.PropertyChanged += (_, _) => Update();
     }
 
-    public Point ControlPoint1
+    public Point Start => new(_edge.Source.Parent.X, _edge.Source.Parent.Y);
+    public Point End => new(_edge.Target.Parent.X, _edge.Target.Parent.Y);
+
+    public Brush Stroke => new SolidColorBrush(_edge.Target.Color) { Opacity = 0.8 };
+
+    public Point C1
     {
         get
         {
-            var dx = EndPoint.X - StartPoint.X;
+            var dx = End.X - Start.X;
             var offset = Math.Abs(dx) * 0.3;
-            return new(StartPoint.X + (dx >= 0 ? offset : -offset), StartPoint.Y);
+            return new Point(Start.X + (dx >- 0 ? offset : - offset), Start.Y);
         }
     }
-
-    public Point ControlPoint2
+    public Point C2
     {
         get
         {
-            var dx = EndPoint.X - StartPoint.X;
+            var dx = End.X - Start.X;
             var offset = Math.Abs(dx) * 0.3;
-            return new(EndPoint.X - (dx >= 0 ? offset : -offset), EndPoint.Y);
+            return new Point(End.X - (dx >= 0 ? offset : -offset), End.Y);
         }
     }
 
-    public ConnectionViewModel(ConnectorViewModel source, ConnectorViewModel target)
-    {
-        Source = source;
-        Target = target;
-        Source.PropertyChanged += (_, _) => Update();
-        Target.PropertyChanged += (_, _) => Update();
-        Update();
-    }
     public void Update()
     {
-        OnPropertyChanged(nameof(StartPoint));
-        OnPropertyChanged(nameof(EndPoint));
-        var mid = new Point(EndPoint.X, StartPoint.Y);
-        Points = new PointCollection { StartPoint, mid, EndPoint };
-        OnPropertyChanged(nameof(Points));
-        OnPropertyChanged(nameof(ControlPoint1));
-        OnPropertyChanged(nameof(ControlPoint2));
+        OnPropertyChanged(nameof(Start));
+        OnPropertyChanged(nameof(End));
+        OnPropertyChanged(nameof(C1));
+        OnPropertyChanged(nameof(C2));
     }
 }
-

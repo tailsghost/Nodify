@@ -13,10 +13,50 @@
             PreviewMouseLeftButtonDown="OnNodeContainerMouseDown"
             Tag="{Binding}"
             ToolTip="{Binding Name}">
-            <TextBlock
-                Margin="2"
-                Foreground="White"
-                Text="{Binding Name}" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="2"
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="{Binding Name}" />
+                <Ellipse
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="{Binding Input.ConnectorSize}"
+                    Height="{Binding Input.ConnectorSize}"
+                    Margin="5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Fill="{Binding Input.Brush}"
+                    Stroke="Black"
+                    StrokeThickness="1"
+                    Tag="{Binding Input}" />
+                <Ellipse
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    Width="{Binding Output.ConnectorSize}"
+                    Height="{Binding Output.ConnectorSize}"
+                    Margin="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Fill="{Binding Output.Brush}"
+                    Stroke="Black"
+                    StrokeThickness="1"
+                    Tag="{Binding Output}" />
+
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

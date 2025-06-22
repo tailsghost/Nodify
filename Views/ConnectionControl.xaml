@@ -9,14 +9,14 @@
     mc:Ignorable="d">
     <Grid IsHitTestVisible="False">
         <Canvas Panel.ZIndex="0">
-            <Path Stroke="{Binding StrokeBrush}" StrokeThickness="3">
+            <Path Stroke="{Binding Stroke}" StrokeThickness="3">
                 <Path.Data>
                     <PathGeometry>
-                        <PathFigure StartPoint="{Binding StartPoint}">
+                        <PathFigure StartPoint="{Binding Start}">
                             <BezierSegment
-                                Point1="{Binding ControlPoint1}"
-                                Point2="{Binding ControlPoint2}"
-                                Point3="{Binding EndPoint}" />
+                                Point1="{Binding C1}"
+                                Point2="{Binding C2}"
+                                Point3="{Binding End}" />
                         </PathFigure>
                     </PathGeometry>
                 </Path.Data>

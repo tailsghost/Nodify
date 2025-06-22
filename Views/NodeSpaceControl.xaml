@@ -61,12 +61,12 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:NodeContainerViewModel}">
+                    <DataTemplate DataType="{x:Type vm:ContainerViewModel}">
                         <local:NodeContainerControl
                             Panel.ZIndex="10"
-                            NodeContainerMouseDown="NodeControl_OnNodeContainerMouseDown"
-                            NodeContainerMouseUp="NodeControl_OnNodeContainerMouseUp"
-                            NodeContainerMove="NodeControl_OnNodeContainerMove" />
+                            NodeContainerMouseDown="ContainerControl_OnMouseDown"
+                            NodeContainerMouseUp="ContainerControl_OnMouseUp"
+                            NodeContainerMove="ContainerControl_OnMouseMove" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>
@@ -94,14 +94,14 @@
                 IsHitTestVisible="False"
                 Stroke="Beige"
                 StrokeThickness="3"
-                Visibility="{Binding ViewModel.IsDragging, Converter={StaticResource BoolToVisibilityConverter}}">
+                Visibility="{Binding ViewModel.IsConnecting, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Path.Data>
                     <PathGeometry>
                         <PathFigure StartPoint="{Binding ViewModel.TempStart, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                             <BezierSegment
                                 Point1="{Binding ViewModel.TempControl1, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
                                 Point2="{Binding ViewModel.TempControl2, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
-                                Point3="{Binding ViewModel.TempEnd, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
+                                Point3="{Binding ViewModel.TempEndPoint, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
                         </PathFigure>
                     </PathGeometry>
                 </Path.Data>
@@ -120,7 +120,7 @@
                             ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
                             ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
                             DataContext="{Binding}"
-                            NodeMouseMove="NodeControl_OnNodeMove"
+                            NodeMouseMove="NodeControl_OnNodeMouseMove"
                             NodeMouseMoveDown="NodeControl_OnNodeMouseDown"
                             NodeMouseMoveUp="NodeControl_OnNodeMouseUp" />
                     </DataTemplate>

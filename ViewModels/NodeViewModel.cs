@@ -1,91 +1,79 @@
-﻿using Nodify.ViewModels.Base;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using System.Windows.Media;
+﻿using System.Collections.ObjectModel;
+using Nodify.Models;
+using Nodify.ViewModels.Base;
 
-namespace Nodify.ViewModels
+namespace Nodify.ViewModels;
+
+public class NodeViewModel : BaseViewModel
 {
-    public class NodeViewModel : BaseViewModel
+    public Guid Id => Node.Id;
+    public string Name => Node.Name;
+
+    public NodeModel Node { get; }
+
+    public double X
     {
-        private double _x, _y;
-
-        public double X
+        get => Node.X;
+        set
         {
-            get => _x;
-            set
+            Node.X = value;
+            OnPropertyChanged();
+            RaiseConnectorPositionsChanged();
+        }
+    }
+    public double Y
+    {
+        get => Node.Y;
+        set
+        {
+            Node.Y = value;
+            OnPropertyChanged();
+            RaiseConnectorPositionsChanged();
+        }
+    }
+
+    public double Width { get; init; }
+    public double Height { get; init; }
+    public ObservableCollection<ConnectorViewModel> Inputs
+    {
+        get
+        {
+            var list = new ObservableCollection<ConnectorViewModel>();
+            for (var i = 0; i < Node.Inputs.Count; i++)
             {
-                if (_x == value) return;
-                _x = value;
-                OnPropertyChanged();
-                RaiseConnectorPositionsChanged();
+                var cm = Node.Inputs[i];
+                list.Add(new ConnectorViewModel(cm));
             }
+            return list;
         }
+    }
 
-        public double Y
+    public ObservableCollection<ConnectorViewModel> Outputs
+    {
+        get
         {
-            get => _y;
-            set
+            var list = new ObservableCollection<ConnectorViewModel>();
+            for (var i = 0; i < Node.Outputs.Count; i++)
             {
-                if (_y == value) return;
-                _y = value;
-                OnPropertyChanged();
-                RaiseConnectorPositionsChanged();
+                var cm = Node.Outputs[i];
+                list.Add(new ConnectorViewModel(cm));
             }
+            return list;
         }
+    }
 
-        public double DragStartX { get; set; }
-        public double DragStartY { get; set; }
+    public NodeViewModel(NodeModel m, double width, double height)
+    {
+        Node = m;
+        Width = width;
+        Height = height;
+    }
 
-        public double Width { get; init; }
-        public double Height { get; init; }
-
-        public string Name { get; }
-
-        public ObservableCollection<ConnectorViewModel> Inputs { get; } = [];
-        public ObservableCollection<ConnectorViewModel> Outputs { get; } = [];
-
-        public NodeViewModel(string name, double x, double y)
-        {
-            X = x;
-            Y = y;
-            Name = name;
-
-            Inputs.Add(new ConnectorViewModel(this, 0,12, true, "Вход 1"));
-            Inputs.Add(new ConnectorViewModel(this, 1,12, true, "Вход 2"));
-
-            Outputs.Add(new ConnectorViewModel(this, 0, 12, false, "Выход 1"));
-            Outputs.Add(new ConnectorViewModel(this, 1, 12, false, "Выход 2"));
-
-            Width = 130;
-            Height = CalculateHeight(Inputs.Count, Outputs.Count);
-
-            Inputs.CollectionChanged += (_, _) => RefreshIndices(Inputs);
-            Outputs.CollectionChanged += (_, _) => RefreshIndices(Outputs);
-        }
-
-
-        private double CalculateHeight(int inputs, int outputs)
-        {
-            return inputs >= outputs ? ((inputs * 12) + inputs* 10) : ((outputs * 12) + outputs * 10);
-        }
-
-        private void RefreshIndices(ObservableCollection<ConnectorViewModel> collection)
-        {
-            for (int i = 0; i < collection.Count; i++)
-                collection[i].Index = i;
-
-            foreach (var c in collection)
-                c.RaiseChanged();
-
-            CommandManager.InvalidateRequerySuggested();
-        }
-
-        private void RaiseConnectorPositionsChanged()
-        {
-            foreach (var input in Inputs)
-                input.RaiseChanged();
-            foreach (var output in Outputs)
-                output.RaiseChanged();
-        }
+    private void RaiseConnectorPositionsChanged()
+    {
+        foreach (var input in Inputs)
+            input.RaiseChanged();
+        foreach (var output in Outputs)
+            output.RaiseChanged();
     }
 }
