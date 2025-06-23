@@ -1,10 +1,11 @@
 ﻿using Nodify.Helpers;
 using Nodify.Models;
-using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+
+namespace Nodify.ViewModels;
 
 public class NodeSpaceViewModel : BaseViewModel
 {
@@ -181,13 +182,5 @@ public class NodeSpaceViewModel : BaseViewModel
 
         TempControl1 = new Point(TempStart.X + (dx >= 0 ? offset : -offset), TempStart.Y);
         TempControl2 = new Point(TempEndPoint.X - (dx >= 0 ? offset : -offset), TempEndPoint.Y);
-    }
-
-    private void ResetDrag()
-    {
-        _dragFrom = null;
-        IsConnecting = false;
-        TempStart = TempEndPoint = new Point();
-        UpdateBezier();
     }
 }

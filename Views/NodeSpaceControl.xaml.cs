@@ -26,12 +26,12 @@ namespace Nodify.Views
 
         public NodeSpaceViewModel ViewModel { get; }
 
-        public NodeSpaceControl()
+        public NodeSpaceControl(NodeSpaceViewModel viewModel)
         {
             InitializeComponent();
 
             DataContext = this;
-            ViewModel = new NodeSpaceViewModel();
+            ViewModel = viewModel;
 
             _tempRect = new Rectangle
             {
