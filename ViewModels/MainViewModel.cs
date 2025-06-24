@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Nodify.ViewModels;
 
-public class NodeSpaceViewModel : BaseViewModel
+public class MainViewModel : BaseViewModel
 {
     private Point _tempEnd;
     private Point _tempControl1;
@@ -22,6 +22,7 @@ public class NodeSpaceViewModel : BaseViewModel
     public ObservableCollection<NodeViewModel> Nodes { get; }
     public ObservableCollection<ContainerViewModel> Containers { get; }
     public ObservableCollection<ConnectionViewModel> Connections { get; }
+    public List<MenuLibrary> MenuLibrary { get; protected set; }
 
     public ICommand AddNodeCmd { get; }
     public ICommand AddContainerCmd { get; }
@@ -33,6 +34,7 @@ public class NodeSpaceViewModel : BaseViewModel
         get => _tempEnd;
         set
         {
+            if(_tempEnd == value)return;
             _tempEnd = value;
             OnPropertyChanged();
         }
@@ -42,6 +44,7 @@ public class NodeSpaceViewModel : BaseViewModel
         get => _isConnecting;
         private set
         {
+            if(_isConnecting == value) return;
             _isConnecting = value;
             OnPropertyChanged();
         }
@@ -51,6 +54,7 @@ public class NodeSpaceViewModel : BaseViewModel
         get => _tempStart;
         private set
         {
+            if(_tempStart == value) return;
             _tempStart = value;
             OnPropertyChanged();
         }
@@ -59,7 +63,7 @@ public class NodeSpaceViewModel : BaseViewModel
     public Point TempControl1 { get => _tempControl1; private set { _tempControl1 = value; OnPropertyChanged();}  }
     public Point TempControl2 { get => _tempControl2; private set { _tempControl2 = value; OnPropertyChanged(); } }
 
-    public NodeSpaceViewModel()
+    public MainViewModel()
     {
         Nodes = new ObservableCollection<NodeViewModel>();
         Containers = new ObservableCollection<ContainerViewModel>();
@@ -67,9 +71,12 @@ public class NodeSpaceViewModel : BaseViewModel
 
         AddNodeCmd = new RelayCommand(p =>
         {
-            if (p is not Point pt) return;
-            var m = Graph.Graph.AddNode("N" + (Nodes.Count + 1), pt.X, pt.Y);
-            Nodes.Add(new NodeViewModel(m,159,200));
+            if(p is not (Point pt, NodeViewModel node)) return;
+
+            var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description,node.Node.InputsName, node.Node.OutputsName));
+
+            var m = Graph.Graph.AddNode(newNode.Node, pt.X, pt.Y);
+            Nodes.Add(newNode);
         });
         AddContainerCmd = new RelayCommand(p =>
         {
@@ -85,7 +92,7 @@ public class NodeSpaceViewModel : BaseViewModel
         {
             if (p is not ConnectorModel cm) return;
             _dragFrom = cm;
-            TempStart = new Point(_dragFrom.Parent.X, _dragFrom.Parent.Y);
+            TempStart = new Point(_dragFrom.X, _dragFrom.Y);
             IsConnecting = true;
         });
         CompleteConnectCmd = new RelayCommand(p =>
@@ -108,8 +115,8 @@ public class NodeSpaceViewModel : BaseViewModel
         _dragFrom = vmConnector?.Model;
         IsConnecting = true;
         if(_dragFrom == null) return;
-        TempStart = new Point(_dragFrom.Parent.X + _dragFrom.Parent.Width / 2,
-            _dragFrom.Parent.Y + _dragFrom.Parent.Height / 2);
+        TempStart = new Point(_dragFrom.X,
+            _dragFrom.Y);
         TempEndPoint = TempStart;
         UpdateBezier();
     }

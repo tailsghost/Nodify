@@ -12,7 +12,7 @@ public class ConnectorViewModel : BaseViewModel
 
     public ConnectorViewModel(ConnectorModel model)
     {
-        Color  = RandomColor();
+        Color = RandomColor();
         Model = model;
     }
 
@@ -43,41 +43,15 @@ public class ConnectorViewModel : BaseViewModel
     public ConnectionViewModel Connection
     {
         get => _connection;
-        set { _connection = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsConnected)); }
-    }
-
-    public string Name => Model.Name;
-
-    public double X => IsInput
-        ? Model.Parent.X + +25 - ConnectorSize
-        : Model.Parent.X + Model.Parent.Width - 15;
-
-    public double Y
-    {
-        get
+        set
         {
-            var list = IsInput ? Model.Parent.Inputs : Model.Parent.Outputs;
-            var count = list.Count;
-
-            if (count == 1)
-                return Model.Parent.Y + Model.Parent.Height / 2;
-
-            var available = Model.Parent.Height - 2 * Margin - ConnectorSize;
-
-            var step = available / (count - 1);
-
-            return Model.Parent.Y
-                   + Margin
-                   + ConnectorSize / 2
-                   + step * Index;
+            if (_connection == value) return;
+            _connection = value;
+            OnPropertyChanged(); OnPropertyChanged(nameof(IsConnected));
         }
     }
 
-    public void RaiseChanged()
-    {
-        if(Model != null)
-            Model.UpdateProperty();
-    }
+    public string Name => Model.Name;
 
     private static Color RandomColor()
     {

@@ -17,8 +17,8 @@ public class ConnectionViewModel : BaseViewModel
         _edge.Target.PropertyChanged += (_, _) => Update();
     }
 
-    public Point Start => new(_edge.Source.Parent.X, _edge.Source.Parent.Y);
-    public Point End => new(_edge.Target.Parent.X, _edge.Target.Parent.Y);
+    public Point Start => new(_edge.Source.X, _edge.Source.Y);
+    public Point End => new(_edge.Target.X, _edge.Target.Y);
 
     public Brush Stroke => new SolidColorBrush(_edge.Target.Color) { Opacity = 0.8 };
 

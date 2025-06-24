@@ -9,8 +9,26 @@ public class ContainerViewModel : BaseViewModel
     public ContainerViewModel(ContainerModel m) => _m = m;
 
     public string Name => _m.Name;
-    public double X { get => _m.X; set { _m.X = value; OnPropertyChanged(); } }
-    public double Y { get => _m.Y; set { _m.Y = value; OnPropertyChanged(); } }
+    public double X
+    {
+        get => _m.X; 
+        set
+        {
+            if (_m.X == value) return;
+            _m.X = value;
+            OnPropertyChanged();
+        }
+    }
+    public double Y
+    {
+        get => _m.Y; 
+        set
+        {
+            if (_m.Y == value) return;
+            _m.Y = value;
+            OnPropertyChanged();
+        }
+    }
     public double Width => _m.Width;
     public double Height => _m.Height;
 

@@ -21,23 +21,51 @@
             BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition Width="90" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition Width="90" />
                 </Grid.ColumnDefinitions>
-                <ItemsControl ItemsSource="{Binding Inputs}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3"
+                    BorderBrush="Beige"
+                    BorderThickness="0,0,0,1">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Medium"
+                        Foreground="Bisque"
+                        Text="{Binding Name}" />
+                </Border>
+
+                <ItemsControl
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    ItemsSource="{Binding Inputs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel VerticalAlignment="Top" Orientation="Vertical" />
+                            <StackPanel VerticalAlignment="Center" Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <DockPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
                                 <Ellipse
+                                    Grid.Column="0"
                                     Width="{Binding ConnectorSize}"
                                     Height="{Binding ConnectorSize}"
-                                    Margin="0,5"
+                                    Margin="0,5,5,5"
+                                    Cursor="Hand"
                                     Fill="{Binding Brush}"
                                     PreviewMouseLeftButtonDown="OnConnectorMouseDown"
                                     PreviewMouseLeftButtonUp="OnConnectorMouseUp"
@@ -45,39 +73,53 @@
                                     StrokeThickness="1"
                                     Tag="{Binding}" />
                                 <TextBlock
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    FontSize="10"
+                                    FontSize="12"
                                     Foreground="Beige"
                                     Text="{Binding Name}" />
-                            </DockPanel>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <ItemsControl Grid.Column="2" ItemsSource="{Binding Outputs}">
+                <ItemsControl
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    ItemsSource="{Binding Outputs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel VerticalAlignment="Top" Orientation="Vertical" />
+                            <StackPanel VerticalAlignment="Center" Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <DockPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="20" />
+                                </Grid.ColumnDefinitions>
                                 <TextBlock
+                                    Grid.Column="0"
+                                    Margin="0,5,5,0"
+                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontSize="10"
+                                    FontSize="12"
                                     Foreground="Beige"
                                     Text="{Binding Name}" />
                                 <Ellipse
+                                    Grid.Column="1"
                                     Width="{Binding ConnectorSize}"
                                     Height="{Binding ConnectorSize}"
-                                    Margin="0,5"
+                                    Margin="0,5,5,0"
+                                    Cursor="Hand"
                                     Fill="{Binding Brush}"
                                     PreviewMouseLeftButtonDown="OnConnectorMouseDown"
                                     PreviewMouseLeftButtonUp="OnConnectorMouseUp"
                                     Stroke="Black"
                                     StrokeThickness="1"
                                     Tag="{Binding}" />
-                            </DockPanel>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

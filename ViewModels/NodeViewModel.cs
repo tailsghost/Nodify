@@ -8,6 +8,7 @@ public class NodeViewModel : BaseViewModel
 {
     public Guid Id => Node.Id;
     public string Name => Node.Name;
+    public string Description => Node.Description;
 
     public NodeModel Node { get; }
 
@@ -16,9 +17,9 @@ public class NodeViewModel : BaseViewModel
         get => Node.X;
         set
         {
+            if(Node.X == value) return;
             Node.X = value;
             OnPropertyChanged();
-            RaiseConnectorPositionsChanged();
         }
     }
     public double Y
@@ -26,14 +27,14 @@ public class NodeViewModel : BaseViewModel
         get => Node.Y;
         set
         {
+            if(Node.Y == value) return;
             Node.Y = value;
             OnPropertyChanged();
-            RaiseConnectorPositionsChanged();
         }
     }
 
-    public double Width { get; init; }
-    public double Height { get; init; }
+    public double Width => Node.Width;
+    public double Height => Node.Height;
     public ObservableCollection<ConnectorViewModel> Inputs
     {
         get
@@ -62,18 +63,8 @@ public class NodeViewModel : BaseViewModel
         }
     }
 
-    public NodeViewModel(NodeModel m, double width, double height)
+    public NodeViewModel(NodeModel m)
     {
         Node = m;
-        Width = width;
-        Height = height;
-    }
-
-    private void RaiseConnectorPositionsChanged()
-    {
-        foreach (var input in Inputs)
-            input.RaiseChanged();
-        foreach (var output in Outputs)
-            output.RaiseChanged();
     }
 }

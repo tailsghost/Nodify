@@ -6,11 +6,12 @@ public class GraphModel
     public List<ContainerModel> Containers { get; } = [];
     public List<EdgeModel> Edges { get; } = [];
 
-    public NodeModel AddNode(string name, double x, double y)
+    public NodeModel AddNode(NodeModel node, double x, double y)
     {
-        var n = new NodeModel(name, x, y);
-        Nodes[n.Id] = n;
-        return n;
+        Nodes[node.Id] = node;
+        node.X = x;
+        node.Y = y;
+        return node;
     }
 
     public ContainerModel AddContainer(double x, double y, double w, double h)

@@ -24,9 +24,11 @@ namespace Nodify.Views
 
         private ConnectorViewModel _dragConnector;
 
-        public NodeSpaceViewModel ViewModel { get; }
+        private NodeViewModel _currentMoveNode;
 
-        public NodeSpaceControl(NodeSpaceViewModel viewModel)
+        public MainViewModel ViewModel { get; }
+
+        public NodeSpaceControl(MainViewModel viewModel)
         {
             InitializeComponent();
 
@@ -74,6 +76,10 @@ namespace Nodify.Views
         {
             var pt = e.GetPosition(SpaceCanvas);
 
+            if (_currentMoveNode != null)
+                Mouse.OverrideCursor = Cursors.SizeAll;
+
+
             if (_isCreatingContainer)
             {
                 var x = Math.Min(pt.X, _containerStart.X);
@@ -108,6 +114,15 @@ namespace Nodify.Views
         {
             var pt = e.GetPosition(SpaceCanvas);
 
+            if (_currentMoveNode != null)
+            {
+                ViewModel.AddNodeCmd.Execute((e.GetPosition(SpaceCanvas), _currentMoveNode));
+                ViewModel.EndDrag(null);
+                _currentMoveNode = null;
+                Mouse.OverrideCursor = null;
+                return;
+            }
+
             if (_isCreatingContainer)
             {
                 _isCreatingContainer = false;
@@ -130,8 +145,6 @@ namespace Nodify.Views
 
             ViewModel.EndDrag(null);
         }
-
-        private void Canvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e) => ViewModel.AddNodeCmd.Execute(e.GetPosition(SpaceCanvas));
 
         private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
@@ -185,6 +198,10 @@ namespace Nodify.Views
 
         private void NodeControl_OnNodeMouseMove(object sender, MouseEventArgs e)
         {
+            if (_currentMoveNode != null)
+            {
+                Mouse.OverrideCursor = Cursors.No;
+            }
             var pt = e.GetPosition(SpaceCanvas);
             ViewModel.UpdateDrag(pt);
             if (_dragItem is not NodeViewModel vm || e.LeftButton != MouseButtonState.Pressed) return;
@@ -197,6 +214,12 @@ namespace Nodify.Views
 
         private void NodeControl_OnNodeMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_currentMoveNode != null)
+            {
+                Mouse.OverrideCursor = null;
+                _currentMoveNode = null;
+            }
+
             if (_dragItem is not NodeViewModel) return;
             (sender as NodeControl)?.ReleaseMouseCapture();
             _dragItem = null;
@@ -211,7 +234,6 @@ namespace Nodify.Views
             _dragItemStart = new Point(vm.X, vm.Y);
             ctl.CaptureMouse();
             e.Handled = true;
-            //ViewModel.GetAllConnectedGroups();
         }
 
         private void ContainerControl_OnMouseMove(object sender, MouseEventArgs e)
@@ -231,7 +253,26 @@ namespace Nodify.Views
             if (_dragItem is not ContainerViewModel) return;
             (sender as NodeContainerControl)?.ReleaseMouseCapture();
             _dragItem = null;
-            e.Handled = true;
+        }
+
+        private void MenuLibraryControl_OnMenuMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is not Grid grid) return;
+            if (grid.DataContext is not NodeViewModel model) return;
+            _currentMoveNode = model;
+            Mouse.OverrideCursor = Cursors.SizeAll;
+        }
+
+        private void MenuLibraryControl_OnMenuMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_currentMoveNode != null)
+                Mouse.OverrideCursor = Cursors.No;
+        }
+
+        private void MenuLibraryControl_OnMenuMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _currentMoveNode = null;
+            Mouse.OverrideCursor = null;
         }
     }
 }

@@ -6,6 +6,10 @@ namespace Nodify.Models;
 
 public class ConnectorModel : BaseViewModel
 {
+    private double _x;
+    private double _y;
+
+
     public IConnectable Parent { get; }
     public bool IsInput { get; }
     public string Name { get; }
@@ -20,17 +24,31 @@ public class ConnectorModel : BaseViewModel
         get => _connectedTo;
         set
         {
-            if (_connectedTo != value)
-            {
-                _connectedTo = value;
-                OnPropertyChanged();
-            }
+            if (_connectedTo == value) return;
+            _connectedTo = value;
+            OnPropertyChanged();
         }
     }
 
-    public void UpdateProperty()
+    public double X
     {
-        OnPropertyChanged();
+        get => _x;
+        set
+        {
+            if (_x == value) return;
+            _x = value;
+            OnPropertyChanged();
+        }
+    }
+    public double Y
+    {
+        get => _y;
+        set
+        {
+            if (_y == value) return;
+            _y = value;
+            OnPropertyChanged();
+        }
     }
 
     public ConnectorModel(IConnectable parent, int index, double size, bool isInput, string name)

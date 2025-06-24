@@ -19,6 +19,7 @@ public class ContainerModel : BaseViewModel, IConnectable
         get => _x;
         set
         {
+            if(_x == value) return;
             _x = value;
             OnPropertyChanged();
         }
@@ -28,6 +29,7 @@ public class ContainerModel : BaseViewModel, IConnectable
         get => _y;
         set
         {
+            if(_y == value) return;
             _y = value;
             OnPropertyChanged();
         }
@@ -37,6 +39,7 @@ public class ContainerModel : BaseViewModel, IConnectable
         get => _width;
         set
         {
+            if(_width == value) return;
             _width = value;
             OnPropertyChanged();
         }
@@ -46,6 +49,7 @@ public class ContainerModel : BaseViewModel, IConnectable
         get => _height;
         set
         {
+            if(_height == value) return;
             _height = value;
             OnPropertyChanged();
         }

@@ -39,8 +39,14 @@
     </UserControl.Resources>
 
     <Grid Background="#0D0D0D">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
         <Canvas
             x:Name="SpaceCanvas"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
             Width="5000"
             Height="2500"
             Margin="5"
@@ -48,7 +54,6 @@
             MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
             MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
             MouseMove="Canvas_MouseMove"
-            MouseRightButtonUp="Canvas_MouseRightButtonUp"
             SnapsToDevicePixels="True">
 
             <Canvas.RenderTransform>
@@ -136,7 +141,14 @@
                     </Style>
                 </ItemsControl.ItemContainerStyle>
             </ItemsControl>
-
         </Canvas>
+
+        <local:MenuLibraryControl
+            Grid.Column="1"
+            DataContext="{Binding ViewModel.MenuLibrary}"
+            MenuMouseDown="MenuLibraryControl_OnMenuMouseDown"
+            MenuMouseMove="MenuLibraryControl_OnMenuMouseMove"
+            MenuMouseUp="MenuLibraryControl_OnMenuMouseUp" />
+
     </Grid>
 </UserControl>
