@@ -1,4 +1,6 @@
-﻿namespace Nodify.Models;
+﻿using Nodify.Interfaces;
+
+namespace Nodify.Models;
 
 public class GraphModel
 {

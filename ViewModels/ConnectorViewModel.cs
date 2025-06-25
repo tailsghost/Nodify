@@ -7,17 +7,16 @@ namespace Nodify.ViewModels;
 public class ConnectorViewModel : BaseViewModel
 {
     private Color _color;
-    private const double Margin = 5;
-    private ConnectionViewModel _connection;
 
     public ConnectorViewModel(ConnectorModel model)
     {
-        Color = RandomColor();
+        Color = model.Color;
         Model = model;
     }
 
     public ConnectorModel Model { get; }
 
+    public string Name => Model.Name;
     public bool IsInput => Model.IsInput;
     public int Index => Model.Index;
 
@@ -38,28 +37,11 @@ public class ConnectorViewModel : BaseViewModel
     public SolidColorBrush Brush => new(Color);
     public SolidColorBrush LineBrush => new SolidColorBrush(Color) { Opacity = 0.8 };
 
-    public bool IsConnected => Connection != null;
+    public bool IsConnected => Model.ConnectedTo != null;
 
-    public ConnectionViewModel Connection
+    public bool AllowConnect(ConnectorModel model)
     {
-        get => _connection;
-        set
-        {
-            if (_connection == value) return;
-            _connection = value;
-            OnPropertyChanged(); OnPropertyChanged(nameof(IsConnected));
-        }
-    }
-
-    public string Name => Model.Name;
-
-    private static Color RandomColor()
-    {
-        var rnd = new Random();
-        return Color.FromRgb(
-            (byte)rnd.Next(128, 256),
-            (byte)rnd.Next(128, 256),
-            (byte)rnd.Next(128, 256)
-        );
+        return !(this.IsConnected && model.ConnectedTo != null) && this.IsInput != model.IsInput &&
+               this.Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
     }
 }

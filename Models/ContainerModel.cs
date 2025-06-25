@@ -1,6 +1,7 @@
 ﻿using Nodify.Interfaces;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace Nodify.Models;
 
@@ -76,10 +77,10 @@ public class ContainerModel : BaseViewModel, IConnectable
         Y = y;
         Width = w;
         Height = h;
-        Input = new ConnectorModel(this, 0, 12, true, "ContainerIn");
-        Output = new ConnectorModel(this, 0, 12, false, "ContainerOut");
-        InnerInput = new ConnectorModel(this, 1, 12, true, "InnerIn");
-        InnerOutput = new ConnectorModel(this, 1, 12, false, "InnerOut");
+        Input = new ConnectorModel(this, 0, 12, true, new ConnectorInfo() {AllowedType = new AllowedType() {Type = "ANY"}, Color = Colors.White, Description = "", Name = ""});
+        Output = new ConnectorModel(this, 0, 12, false, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
+        InnerInput = new ConnectorModel(this, 1, 12, true, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
+        InnerOutput = new ConnectorModel(this, 1, 12, false, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
     }
 }
 

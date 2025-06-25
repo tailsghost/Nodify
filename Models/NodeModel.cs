@@ -6,12 +6,12 @@ namespace Nodify.Models;
 
 public class NodeModel : BaseViewModel, IConnectable
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public string Name { get; init; }
+    public string Description { get; init; }
 
-    public List<string> InputsName;
-    public List<string> OutputsName;
+    public List<IConnectorInfo> InputsInfo;
+    public List<IConnectorInfo> OutputsInfo;
 
     public double X { get; set; }
     public double Y { get; set; }
@@ -20,31 +20,33 @@ public class NodeModel : BaseViewModel, IConnectable
     public ObservableCollection<ConnectorModel> Inputs { get; } = [];
     public ObservableCollection<ConnectorModel> Outputs { get; } = [];
 
-    public NodeModel(string name, string description, List<string> inputsName, List<string> outputsName)
+    public bool IsFinalBlock { get; init; }
+
+    public NodeModel(string name, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isFinalBlock = false)
     {
         Name = name;
         Description = description;
-        InputsName = inputsName;
-        OutputsName = outputsName;
+        InputsInfo = inputs;
+        OutputsInfo = outputs;
 
-        for (var i = 0; i < inputsName.Count; i++)
+        for (var i = 0; i < inputs.Count; i++)
         {
-            var input = inputsName[i];
+            var input = inputs[i];
             Inputs.Add(new ConnectorModel(this, i, 12, true, input));
         }
 
-        for (var i = 0; i < outputsName.Count; i++)
+        for (var i = 0; i < outputs.Count; i++)
         {
-            var output = outputsName[i];
-            Outputs.Add(new ConnectorModel(this,i,12,false,output));
+            var output = outputs[i];
+            Outputs.Add(new ConnectorModel(this, i, 12, false, output));
         }
 
-        Width = 200;
         Height = Inputs.Count >= Outputs.Count
             ? CalculationHeight(Inputs.Count, 12, 12) + 30
             : CalculationHeight(Outputs.Count, 12, 12) + 30;
-    }
 
+        IsFinalBlock = isFinalBlock;
+    }
 
     private double CalculationHeight(int count, int size, int margin)
     {

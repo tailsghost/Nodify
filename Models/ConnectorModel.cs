@@ -9,12 +9,13 @@ public class ConnectorModel : BaseViewModel
     private double _x;
     private double _y;
 
+    public IConnectorInfo ConnectorInfo;
 
     public IConnectable Parent { get; }
     public bool IsInput { get; }
-    public string Name { get; }
+    public string Name => ConnectorInfo.Name;  
 
-    public Color Color { get; }
+    public Color Color => ConnectorInfo.Color;
     public double ConnectorSize { get; }
     public int Index { get; }
 
@@ -51,13 +52,12 @@ public class ConnectorModel : BaseViewModel
         }
     }
 
-    public ConnectorModel(IConnectable parent, int index, double size, bool isInput, string name)
+    public ConnectorModel(IConnectable parent, int index, double size, bool isInput, IConnectorInfo connectorInfo)
     {
         Parent = parent;
         IsInput = isInput;
         Index = index;
         ConnectorSize = size;
-        Name = name;
-        Color = Color.FromRgb((byte)Random.Shared.Next(128, 256), (byte)Random.Shared.Next(128, 256), (byte)Random.Shared.Next(128, 256));
+        ConnectorInfo = connectorInfo;
     }
 }

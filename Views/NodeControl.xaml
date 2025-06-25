@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="{Binding Width}"
     Height="{Binding Height}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -21,9 +20,8 @@
             BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="90" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25" />
@@ -32,7 +30,7 @@
 
                 <Border
                     Grid.Column="0"
-                    Grid.ColumnSpan="3"
+                    Grid.ColumnSpan="2"
                     BorderBrush="Beige"
                     BorderThickness="0,0,0,1">
                     <TextBlock
@@ -47,6 +45,7 @@
                 <ItemsControl
                     Grid.Row="1"
                     Grid.Column="0"
+                    Margin="0,0,18,0"
                     ItemsSource="{Binding Inputs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -55,16 +54,16 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid MaxWidth="115">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="15" />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
                                 <Ellipse
                                     Grid.Column="0"
                                     Width="{Binding ConnectorSize}"
                                     Height="{Binding ConnectorSize}"
-                                    Margin="0,5,5,5"
+                                    Margin="-5,5,0,5"
                                     Cursor="Hand"
                                     Fill="{Binding Brush}"
                                     PreviewMouseLeftButtonDown="OnConnectorMouseDown"
@@ -85,7 +84,8 @@
                 </ItemsControl>
                 <ItemsControl
                     Grid.Row="1"
-                    Grid.Column="2"
+                    Grid.Column="1"
+                    Margin="18,0,0,0"
                     ItemsSource="{Binding Outputs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -97,7 +97,7 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
-                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="15" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Column="0"
@@ -111,7 +111,7 @@
                                     Grid.Column="1"
                                     Width="{Binding ConnectorSize}"
                                     Height="{Binding ConnectorSize}"
-                                    Margin="0,5,5,0"
+                                    Margin="0,5,0,0"
                                     Cursor="Hand"
                                     Fill="{Binding Brush}"
                                     PreviewMouseLeftButtonDown="OnConnectorMouseDown"

@@ -1,4 +1,5 @@
 ﻿using Nodify.Helpers;
+using Nodify.Interfaces;
 using Nodify.Models;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
@@ -17,12 +18,12 @@ public class MainViewModel : BaseViewModel
 
     private ConnectorModel _dragFrom;
 
-    private GraphViewModel Graph { get; } = new(new GraphModel());
+    protected GraphViewModel Graph { get; } = new(new GraphModel());
 
     public ObservableCollection<NodeViewModel> Nodes { get; }
     public ObservableCollection<ContainerViewModel> Containers { get; }
     public ObservableCollection<ConnectionViewModel> Connections { get; }
-    public List<MenuLibrary> MenuLibrary { get; protected set; }
+    public ObservableCollection<MenuLibrary> MenuLibrary { get; protected set; } = [];
 
     public ICommand AddNodeCmd { get; }
     public ICommand AddContainerCmd { get; }
@@ -73,7 +74,7 @@ public class MainViewModel : BaseViewModel
         {
             if(p is not (Point pt, NodeViewModel node)) return;
 
-            var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description,node.Node.InputsName, node.Node.OutputsName));
+            var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description,node.Node.InputsInfo, node.Node.OutputsInfo));
 
             var m = Graph.Graph.AddNode(newNode.Node, pt.X, pt.Y);
             Nodes.Add(newNode);
@@ -97,16 +98,20 @@ public class MainViewModel : BaseViewModel
         });
         CompleteConnectCmd = new RelayCommand(p =>
         {
-            if (IsConnecting && p is ConnectorModel to && _dragFrom != null && to != _dragFrom)
+            if (IsConnecting && p is ConnectorViewModel to && _dragFrom != null && to.Model != _dragFrom)
             {
-                var source = _dragFrom.IsInput ? _dragFrom : to;
-                var target = _dragFrom.IsInput ? to : _dragFrom;
-                var e = Graph.Graph.AddEdge(_dragFrom, to);
-                source.ConnectedTo = target;
-                target.ConnectedTo = source;
+                var e = Graph.Graph.AddEdge(_dragFrom, to.Model);
                 Connections.Add(new ConnectionViewModel(e));
             }
             IsConnecting = false;
+        }, o =>
+        {
+            if (IsConnecting && o is ConnectorViewModel to && _dragFrom != null && to.Model != _dragFrom)
+            {
+                return to.AllowConnect(_dragFrom);
+            }
+
+            return false;
         });
     }
 
@@ -132,7 +137,7 @@ public class MainViewModel : BaseViewModel
     {
         if (IsConnecting && vmConnector != null && _dragFrom != null && vmConnector.Model != _dragFrom)
         {
-            CompleteConnectCmd.Execute(vmConnector.Model);
+            CompleteConnectCmd.Execute(vmConnector);
         }
 
         IsConnecting = false;
@@ -174,12 +179,6 @@ public class MainViewModel : BaseViewModel
         }
 
         return false;
-    }
-
-    public void GetAllConnectedGroups()
-    {
-       var result = Graph.GetAllConnectedGroups();
-       var result1 = Graph.GetConnectedNodes(Nodes.First().Node);
     }
 
     private void UpdateBezier()

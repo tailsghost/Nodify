@@ -9,6 +9,7 @@ public class NodeViewModel : BaseViewModel
     public Guid Id => Node.Id;
     public string Name => Node.Name;
     public string Description => Node.Description;
+    public bool IsFinalBlock => Node.IsFinalBlock;
 
     public NodeModel Node { get; }
 
