@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 using Nodify.Interfaces;
 using Nodify.ViewModels.Base;
 
@@ -32,13 +33,13 @@ public class NodeModel : BaseViewModel, IConnectable
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            Inputs.Add(new ConnectorModel(this, i, 12, true, input));
+            Inputs.Add(new ConnectorModel(this, i, 12, true, input, isFinalBlock));
         }
 
         for (var i = 0; i < outputs.Count; i++)
         {
             var output = outputs[i];
-            Outputs.Add(new ConnectorModel(this, i, 12, false, output));
+            Outputs.Add(new ConnectorModel(this, i, 12, false, output, isFinalBlock));
         }
 
         Height = Inputs.Count >= Outputs.Count

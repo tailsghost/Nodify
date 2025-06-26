@@ -41,7 +41,13 @@ public class ConnectorViewModel : BaseViewModel
 
     public bool AllowConnect(ConnectorModel model)
     {
+
+        if (Model.IsFinalBlock || model.IsFinalBlock)
+        {
+            return Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
+        }
+
         return !(this.IsConnected && model.ConnectedTo != null) && this.IsInput != model.IsInput &&
-               this.Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
+                     this.Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
     }
 }

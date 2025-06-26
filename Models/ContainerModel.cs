@@ -77,10 +77,10 @@ public class ContainerModel : BaseViewModel, IConnectable
         Y = y;
         Width = w;
         Height = h;
-        Input = new ConnectorModel(this, 0, 12, true, new ConnectorInfo() {AllowedType = new AllowedType() {Type = "ANY"}, Color = Colors.White, Description = "", Name = ""});
-        Output = new ConnectorModel(this, 0, 12, false, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
-        InnerInput = new ConnectorModel(this, 1, 12, true, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
-        InnerOutput = new ConnectorModel(this, 1, 12, false, new ConnectorInfo() { AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
+        Input = new ConnectorModel(this, 0, 12, true, new ConnectorInfo() {Id = Guid.NewGuid(),AllowedType = new AllowedType() {Type = "ANY"}, Color = Colors.White, Description = "", Name = ""});
+        Output = new ConnectorModel(this, 0, 12, false, new ConnectorInfo() { Id = Guid.NewGuid(), AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
+        InnerInput = new ConnectorModel(this, 1, 12, true, new ConnectorInfo() { Id = Guid.NewGuid(), AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
+        InnerOutput = new ConnectorModel(this, 1, 12, false, new ConnectorInfo() { Id = Guid.NewGuid(), AllowedType = new AllowedType() { Type = "ANY" }, Color = Colors.White, Description = "", Name = "" });
     }
 }
 

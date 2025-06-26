@@ -1,6 +1,6 @@
-﻿using System.Windows.Media;
-using Nodify.Interfaces;
+﻿using Nodify.Interfaces;
 using Nodify.ViewModels.Base;
+using System.Windows.Media;
 
 namespace Nodify.Models;
 
@@ -9,7 +9,11 @@ public class ConnectorModel : BaseViewModel
     private double _x;
     private double _y;
 
-    public IConnectorInfo ConnectorInfo;
+    public Guid Id { get; init; }
+
+    public bool IsFinalBlock;
+
+    public IConnectorInfo ConnectorInfo { get; }
 
     public IConnectable Parent { get; }
     public bool IsInput { get; }
@@ -52,12 +56,14 @@ public class ConnectorModel : BaseViewModel
         }
     }
 
-    public ConnectorModel(IConnectable parent, int index, double size, bool isInput, IConnectorInfo connectorInfo)
+    public ConnectorModel(IConnectable parent, int index, double size, bool isInput, IConnectorInfo connectorInfo, bool isFinalBlock = false)
     {
         Parent = parent;
         IsInput = isInput;
         Index = index;
         ConnectorSize = size;
         ConnectorInfo = connectorInfo;
+        IsFinalBlock = isFinalBlock;
+        Id = connectorInfo.Id == null || connectorInfo.Id == Guid.Empty ? Guid.NewGuid() : connectorInfo.Id;
     }
 }

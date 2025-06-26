@@ -5,6 +5,7 @@ namespace Nodify.Models;
 
 public class ConnectorInfo : IConnectorInfo
 {
+    public Guid Id { get; init; }
     public string Name { get; init; }
     public IAllowedType AllowedType { get; init; }
     public string Description { get; init; }

@@ -1,4 +1,5 @@
 ﻿using Nodify.Models;
+using System.Globalization;
 
 namespace Nodify.ViewModels;
 
@@ -10,70 +11,80 @@ public class GraphViewModel
         Graph = graphModel;
     }
 
+
     public List<NodeModel> TopoSort()
     {
         var n = Graph.Nodes.Count;
-        var nodes = new NodeModel[n];
-        Graph.Nodes.Values.CopyTo(nodes, 0);
 
-        var adj = new List<int>[n];
-        var indegree = new int[n];
+        var keys = new Guid[n];
+
+        Graph.Nodes.Keys.CopyTo(keys, 0);
+
+        var nodeArr = new NodeModel[n];
+
         for (var i = 0; i < n; i++)
         {
-            adj[i] = [];
-            indegree[i] = 0;
+            nodeArr[i] = Graph.Nodes[keys[i]];
         }
 
-        var m = Graph.Edges.Count;
-        for (var i = 0; i < m; i++)
+        var inDegree = new Dictionary<NodeModel, int>();
+
+        for (var i = 0; i < n; i++)
+        {
+            inDegree[nodeArr[i]] = 0;
+        }
+
+        var adj = new Dictionary<NodeModel, List<NodeModel>>(n);
+
+        for (var i = 0; i < n; i++)
+        {
+            adj[nodeArr[i]] = [];
+        }
+
+        for (var i = 0; i < Graph.Edges.Count; i++)
         {
             var edge = Graph.Edges[i];
-            var uNode = edge.Source.Parent as NodeModel;
-            var vNode = edge.Target.Parent as NodeModel;
+            var src = edge.Source.Parent as NodeModel;
+            var tgt = edge.Target.Parent as NodeModel;
 
-            var uIndex = -1;
-            var vIndex = -1;
-            for (var j = 0; j < n; j++)
-            {
-                if (nodes[j] == uNode) uIndex = j;
-                if (nodes[j] == vNode) vIndex = j;
-                if (uIndex != -1 && vIndex != -1) break;
-            }
-
-            if (uIndex < 0 || vIndex < 0)
+            if (src == null || tgt == null)
                 continue;
 
-            adj[uIndex].Add(vIndex);
-            indegree[vIndex]++;
+            adj[src].Add(tgt);
+            inDegree[tgt] = inDegree[tgt] + 1;
         }
 
-        var queue = new Queue<int>();
+        var queue = new Queue<NodeModel>();
         for (var i = 0; i < n; i++)
         {
-            if (indegree[i] == 0)
-                queue.Enqueue(i);
+            var node = nodeArr[i];
+            if (inDegree[node] == 0)
+                queue.Enqueue(node);
         }
 
-        var result = new List<NodeModel>(n);
+        var sorted = new List<NodeModel>(n);
+
         while (queue.Count > 0)
         {
             var u = queue.Dequeue();
-            result.Add(nodes[u]);
+            sorted.Add(u);
 
-            var cnt = adj[u].Count;
-            for (var k = 0; k < cnt; k++)
+            var neighbours = adj[u];
+            for (var i = 0; i < neighbours.Count; i++)
             {
-                var v = adj[u][k];
-                indegree[v]--;
-                if (indegree[v] == 0)
+                var v = neighbours[i];
+                inDegree[v] = inDegree[v] - 1;
+                if (inDegree[v] == 0)
                     queue.Enqueue(v);
             }
         }
 
-        if (result.Count != n)
-            throw new InvalidOperationException("Граф содержит цикл, топологическая сортировка невозможна.");
 
-        return result;
+        if (sorted.Count != n)
+            throw new InvalidOperationException("Граф содержит цикл — топологическая сортировка невозможна.");
+
+
+        return sorted;
     }
 }
 
