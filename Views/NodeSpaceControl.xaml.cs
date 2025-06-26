@@ -226,6 +226,23 @@ namespace Nodify.Views
             e.Handled = true;
         }
 
+        private void NodeControl_OnNodeMouseRightClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not NodeControl node) return;
+            if(node.DataContext is not NodeViewModel vm) return;
+
+            ViewModel.RemoveNode(vm);
+            e.Handled = true;
+        }
+
+        private void UIElement_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not ConnectionControl connection) return;
+            if(connection.DataContext is not ConnectionViewModel vm) return;
+            ViewModel.RemoveConnection(vm);
+            e.Handled = true;
+        }
+
         private void ContainerControl_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is not NodeContainerControl { DataContext: ContainerViewModel vm } ctl) return;

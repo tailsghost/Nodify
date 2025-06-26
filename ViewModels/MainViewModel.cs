@@ -3,6 +3,7 @@ using Nodify.Models;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Nodify.ViewModels;
@@ -151,33 +152,117 @@ public class MainViewModel : BaseViewModel
         return true;
     }
 
-    public (double X, double Y) FindSafePosition(NodeViewModel node, int steps,
-        double startX, double startY, double endX, double endY)
+    public void RemoveConnection(ConnectionViewModel vm)
     {
-        double sx = startX, sy = startY;
-        for (var i = 1; i <= steps; i++)
+        var edge = vm.Edge;
+        edge.Source.ConnectedTo = null;
+        edge.Target.ConnectedTo = null;
+
+        for (var i = 0; i < Graph.Graph.Edges.Count;i++)
         {
-            var t = i / (double)steps;
-            var tx = startX + (endX - startX) * t;
-            var ty = startY + (endY - startY) * t;
-            if (IsOverlapping(node, tx, ty)) break;
-            sx = tx; sy = ty;
+            var removeEdges = new List<EdgeModel>();
+            if (Graph.Graph.Edges[i] == edge)
+            {
+                var edg = Graph.Graph.Edges[i];
+                removeEdges.Add(edg);
+            }
+
+            for (var j = 0; j < removeEdges.Count; j++)
+            {
+                Graph.Graph.Edges.Remove(removeEdges[j]);
+            }
         }
-        return (sx, sy);
+
+        var removeConnection = new List<ConnectionViewModel>();
+        for (var i = 0; i < Connections.Count; i++)
+        {
+            if (Connections[i] == vm)
+            {
+                removeConnection.Add(Connections[i]);
+            }
+        }
+
+        for (var i = 0; i < removeConnection.Count; i++)
+        {
+            Connections.Remove(removeConnection[i]);
+        }
     }
 
-    public bool IsOverlapping(NodeViewModel node, double x, double y)
+    public void RemoveNode(NodeViewModel vm)
     {
-        for (var index = 0; index < Nodes.Count; index++)
+        Graph.Graph.Nodes.Remove(vm.Node.Id);
+        Nodes.Remove(vm);
+
+        for (var ci = 0; ci < Graph.Graph.Containers.Count; ci++)
         {
-            var n = Nodes[index];
-            if (n == node) continue;
-            var ox = x < n.X + n.Width && x + node.Width > n.X;
-            var oy = y < n.Y + n.Height && y + node.Height > n.Y;
-            if (ox && oy) return true;
+            var container = Graph.Graph.Containers[ci];
+            container.Nodes.Remove(vm.Node);
         }
 
-        return false;
+        for (var ci = 0; ci < Containers.Count; ci++)
+        {
+            var containerVm = Containers[ci];
+            if (containerVm.Model.Nodes.Contains(vm.Node))
+            {
+                containerVm.Model.Nodes.Remove(vm.Node);
+            }
+        }
+
+        var allConnectors = new List<ConnectorModel>();
+        for (var i = 0; i < vm.Inputs.Count; i++)
+        {
+            allConnectors.Add(vm.Inputs[i].Model);
+        }
+        for (var i = 0; i < vm.Outputs.Count; i++)
+        {
+            allConnectors.Add(vm.Outputs[i].Model);
+        }
+
+        var edgesToRemove = new List<EdgeModel>();
+        for (var ei = 0; ei < Graph.Graph.Edges.Count; ei++)
+        {
+            var edge = Graph.Graph.Edges[ei];
+            var involvesConnector = false;
+            for (var ci2 = 0; ci2 < allConnectors.Count; ci2++)
+            {
+                var conn = allConnectors[ci2];
+                if (edge.Source != conn && edge.Target != conn) continue;
+                involvesConnector = true;
+                break;
+            }
+
+            if (!involvesConnector) continue;
+            edge.Source.ConnectedTo = null;
+            edge.Target.ConnectedTo = null;
+            edgesToRemove.Add(edge);
+        }
+
+        for (var ri = 0; ri < edgesToRemove.Count; ri++)
+        {
+            Graph.Graph.Edges.Remove(edgesToRemove[ri]);
+        }
+
+        var connsToRemove = new List<ConnectionViewModel>();
+        for (var ci3 = 0; ci3 < Connections.Count; ci3++)
+        {
+            var connVm = Connections[ci3];
+            var involves = false;
+            for (var ci4 = 0; ci4 < allConnectors.Count; ci4++)
+            {
+                var conn = allConnectors[ci4];
+                if (connVm.Edge.Source != conn && connVm.Edge.Target != conn) continue;
+                involves = true;
+                break;
+            }
+            if (involves)
+            {
+                connsToRemove.Add(connVm);
+            }
+        }
+        for (var ri2 = 0; ri2 < connsToRemove.Count; ri2++)
+        {
+            Connections.Remove(connsToRemove[ri2]);
+        }
     }
 
     private void UpdateBezier()

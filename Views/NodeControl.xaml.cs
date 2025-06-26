@@ -34,6 +34,12 @@ public partial class NodeControl
             typeof(MouseEventHandler),
             typeof(NodeControl));
 
+    public static readonly RoutedEvent NodeMouseRightClickEvent =
+        EventManager.RegisterRoutedEvent(nameof(NodeMouseRightClick),
+            RoutingStrategy.Bubble,
+            typeof(MouseButtonEventHandler),
+            typeof(NodeControl));
+
     public event RoutedEventHandler ConnectorMouseDown
     {
         add => AddHandler(ConnectorMouseDownEvent, value);
@@ -64,10 +70,15 @@ public partial class NodeControl
         remove => RemoveHandler(NodeMouseMoveEvent, value);
     }
 
+    public event MouseButtonEventHandler NodeMouseRightClick
+    {
+        add => AddHandler(NodeMouseRightClickEvent, value);
+        remove => RemoveHandler(NodeMouseRightClickEvent, value);
+    }
+
     public NodeControl()
     {
         InitializeComponent();
-
 
         Node.AddHandler(
             UIElement.PreviewMouseLeftButtonDownEvent,
@@ -160,6 +171,17 @@ public partial class NodeControl
         e.Handled = true;
     }
 
+    private void OnNodeMouseRightClick(object s, MouseButtonEventArgs e)
+    {
+        RaiseEvent(new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, e.ChangedButton)
+        {
+            RoutedEvent = NodeMouseRightClickEvent,
+            Source = this
+        });
+
+        e.Handled = true;
+    }
+
     private void OnConnectorMouseDown(object s, MouseButtonEventArgs e)
     {
         if (s is not Ellipse ellipse) return;
@@ -167,11 +189,10 @@ public partial class NodeControl
         e.Handled = true;
     }
 
-
     private void OnConnectorMouseUp(object s, MouseButtonEventArgs e)
     {
         if (s is not Ellipse ellipse) return;
-            Mouse.Capture(null);
+        Mouse.Capture(null);
         RaiseEvent(new RoutedEventArgs(ConnectorMouseUpEvent, ellipse));
         e.Handled = true;
     }

@@ -1,5 +1,4 @@
 ﻿using Nodify.Models;
-using System.Globalization;
 
 namespace Nodify.ViewModels;
 
@@ -10,7 +9,6 @@ public class GraphViewModel
     {
         Graph = graphModel;
     }
-
 
     public List<NodeModel> TopoSort()
     {

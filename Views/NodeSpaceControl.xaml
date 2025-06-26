@@ -94,7 +94,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:ConnectionControl Panel.ZIndex="20" DataContext="{Binding}" />
+                        <local:ConnectionControl ConnectionMouseRightClick="UIElement_OnMouseRightButtonDown" Panel.ZIndex="20" DataContext="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -126,6 +126,7 @@
                     <DataTemplate>
                         <local:NodeControl
                             Panel.ZIndex="100"
+                            NodeMouseRightClick="NodeControl_OnNodeMouseRightClick"
                             ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
                             ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
                             DataContext="{Binding}"

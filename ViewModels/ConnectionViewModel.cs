@@ -1,6 +1,5 @@
 ﻿using Nodify.Models;
 using Nodify.ViewModels.Base;
-using System.Net;
 using System.Windows;
 using System.Windows.Media;
 
@@ -8,19 +7,24 @@ namespace Nodify.ViewModels;
 
 public class ConnectionViewModel : BaseViewModel
 {
-    private readonly EdgeModel _edge;
+    public readonly EdgeModel Edge;
 
     public ConnectionViewModel(EdgeModel e)
     {
-        _edge = e;
-        _edge.Source.PropertyChanged += (_, _) => Update();
-        _edge.Target.PropertyChanged += (_, _) => Update();
+        Edge = e;
+        Edge.Source.PropertyChanged += (_, _) => Update();
+        Edge.Target.PropertyChanged += (_, _) => Update();
     }
 
-    public Point Start => new(_edge.Source.X, _edge.Source.Y);
-    public Point End => new(_edge.Target.X, _edge.Target.Y);
+    public bool EqualsConnector(ConnectorModel model)
+    {
+        return Edge.Source == model || Edge.Target == model;
+    }
 
-    public Brush Stroke => new SolidColorBrush(_edge.Target.Color) { Opacity = 0.8 };
+    public Point Start => new(Edge.Source.X, Edge.Source.Y);
+    public Point End => new(Edge.Target.X, Edge.Target.Y);
+
+    public Brush Stroke => new SolidColorBrush(Edge.Target.Color) { Opacity = 0.8 };
 
     public Point C1
     {

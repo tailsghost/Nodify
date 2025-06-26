@@ -7,9 +7,9 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid IsHitTestVisible="False">
+    <Grid PreviewMouseRightButtonDown="OnConnectionMouseRightClick">
         <Canvas Panel.ZIndex="0">
-            <Path Stroke="{Binding Stroke}" StrokeThickness="3">
+            <Path Stroke="{Binding Stroke}" StrokeThickness="4">
                 <Path.Data>
                     <PathGeometry>
                         <PathFigure StartPoint="{Binding Start}">

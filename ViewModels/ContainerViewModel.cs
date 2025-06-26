@@ -5,35 +5,35 @@ namespace Nodify.ViewModels;
 
 public class ContainerViewModel : BaseViewModel
 {
-    private readonly ContainerModel _m;
-    public ContainerViewModel(ContainerModel m) => _m = m;
+    public readonly ContainerModel Model;
+    public ContainerViewModel(ContainerModel m) => Model = m;
 
-    public string Name => _m.Name;
+    public string Name => Model.Name;
     public double X
     {
-        get => _m.X; 
+        get => Model.X; 
         set
         {
-            if (_m.X == value) return;
-            _m.X = value;
+            if (Model.X == value) return;
+            Model.X = value;
             OnPropertyChanged();
         }
     }
     public double Y
     {
-        get => _m.Y; 
+        get => Model.Y; 
         set
         {
-            if (_m.Y == value) return;
-            _m.Y = value;
+            if (Model.Y == value) return;
+            Model.Y = value;
             OnPropertyChanged();
         }
     }
-    public double Width => _m.Width;
-    public double Height => _m.Height;
+    public double Width => Model.Width;
+    public double Height => Model.Height;
 
-    public ConnectorViewModel Input => new(_m.Inputs.First());
-    public ConnectorViewModel Output => new(_m.Outputs.First());
+    public ConnectorViewModel Input => new(Model.Inputs.First());
+    public ConnectorViewModel Output => new(Model.Outputs.First());
 
     public ConnectorModel InnerInput { get; }
     public ConnectorModel InnerOutput { get; }
