@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Xml.Linq;
 
 namespace Nodify.ViewModels;
 
@@ -18,7 +19,7 @@ public class MainViewModel : BaseViewModel
 
     private ConnectorModel _dragFrom;
 
-    protected GraphViewModel Graph { get; } = new(new GraphModel());
+    //protected GraphViewModel Graph { get; } = new(new GraphModel());
 
     public ObservableCollection<NodeViewModel> Nodes { get; }
     public ObservableCollection<ContainerViewModel> Containers { get; }
@@ -75,15 +76,15 @@ public class MainViewModel : BaseViewModel
             if(p is not (Point pt, NodeViewModel node)) return;
 
             var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description,node.Node.InputsInfo, node.Node.OutputsInfo, node.IsFinalBlock));
-
-            var m = Graph.Graph.AddNode(newNode.Node, pt.X, pt.Y);
+            newNode.X = pt.X;
+            newNode.Y = pt.Y;
             Nodes.Add(newNode);
         });
         AddContainerCmd = new RelayCommand(p =>
         {
             if (p is not Rect r) return;
-            var m = Graph.Graph.AddContainer(r.X, r.Y, r.Width, r.Height);
-            Containers.Add(new ContainerViewModel(m));
+            var c = new ContainerModel(r.X, r.Y, r.Width, r.Height);
+            Containers.Add(new ContainerViewModel(c));
         }, o =>
         {
             if (o is not Rect r) return false;
@@ -100,7 +101,9 @@ public class MainViewModel : BaseViewModel
         {
             if (IsConnecting && p is ConnectorViewModel to && _dragFrom != null && to.Model != _dragFrom)
             {
-                var e = Graph.Graph.AddEdge(_dragFrom, to.Model);
+                var e = new EdgeModel(_dragFrom, to.Model);
+                _dragFrom.ConnectedTo = to.Model;
+                to.Model.ConnectedTo = _dragFrom;
                 Connections.Add(new ConnectionViewModel(e));
             }
             IsConnecting = false;
@@ -158,21 +161,6 @@ public class MainViewModel : BaseViewModel
         edge.Source.ConnectedTo = null;
         edge.Target.ConnectedTo = null;
 
-        for (var i = 0; i < Graph.Graph.Edges.Count;i++)
-        {
-            var removeEdges = new List<EdgeModel>();
-            if (Graph.Graph.Edges[i] == edge)
-            {
-                var edg = Graph.Graph.Edges[i];
-                removeEdges.Add(edg);
-            }
-
-            for (var j = 0; j < removeEdges.Count; j++)
-            {
-                Graph.Graph.Edges.Remove(removeEdges[j]);
-            }
-        }
-
         var removeConnection = new List<ConnectionViewModel>();
         for (var i = 0; i < Connections.Count; i++)
         {
@@ -190,14 +178,7 @@ public class MainViewModel : BaseViewModel
 
     public void RemoveNode(NodeViewModel vm)
     {
-        Graph.Graph.Nodes.Remove(vm.Node.Id);
         Nodes.Remove(vm);
-
-        for (var ci = 0; ci < Graph.Graph.Containers.Count; ci++)
-        {
-            var container = Graph.Graph.Containers[ci];
-            container.Nodes.Remove(vm.Node);
-        }
 
         for (var ci = 0; ci < Containers.Count; ci++)
         {
@@ -216,30 +197,6 @@ public class MainViewModel : BaseViewModel
         for (var i = 0; i < vm.Outputs.Count; i++)
         {
             allConnectors.Add(vm.Outputs[i].Model);
-        }
-
-        var edgesToRemove = new List<EdgeModel>();
-        for (var ei = 0; ei < Graph.Graph.Edges.Count; ei++)
-        {
-            var edge = Graph.Graph.Edges[ei];
-            var involvesConnector = false;
-            for (var ci2 = 0; ci2 < allConnectors.Count; ci2++)
-            {
-                var conn = allConnectors[ci2];
-                if (edge.Source != conn && edge.Target != conn) continue;
-                involvesConnector = true;
-                break;
-            }
-
-            if (!involvesConnector) continue;
-            edge.Source.ConnectedTo = null;
-            edge.Target.ConnectedTo = null;
-            edgesToRemove.Add(edge);
-        }
-
-        for (var ri = 0; ri < edgesToRemove.Count; ri++)
-        {
-            Graph.Graph.Edges.Remove(edgesToRemove[ri]);
         }
 
         var connsToRemove = new List<ConnectionViewModel>();
