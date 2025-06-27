@@ -1,4 +1,5 @@
-﻿using Nodify.Models;
+﻿using Nodify.Interfaces;
+using Nodify.Models;
 using Nodify.ViewModels.Base;
 using System.Windows.Media;
 
@@ -38,6 +39,8 @@ public class ConnectorViewModel : BaseViewModel
     public SolidColorBrush LineBrush => new SolidColorBrush(Color) { Opacity = 0.8 };
 
     public bool IsConnected => Model.ConnectedTo != null;
+    public ConnectorModel ConnectedTo => Model.ConnectedTo;
+    public  IConnectable Parent => Model.Parent;
 
     public bool AllowConnect(ConnectorModel model)
     {
