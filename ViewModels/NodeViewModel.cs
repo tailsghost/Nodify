@@ -4,7 +4,7 @@ using Nodify.ViewModels.Base;
 
 namespace Nodify.ViewModels;
 
-public class NodeViewModel : BaseViewModel
+public class NodeViewModel: BaseViewModel
 {
     public Guid Id => Node.Id;
     public string Name => Node.Name;

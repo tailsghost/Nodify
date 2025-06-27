@@ -40,7 +40,9 @@ public class ConnectorViewModel : BaseViewModel
 
     public bool IsConnected => Model.ConnectedTo != null;
     public ConnectorModel ConnectedTo => Model.ConnectedTo;
-    public  IConnectable Parent => Model.Parent;
+    public  IConnectable Parent => Model.Node;
+
+    public string Type => Model.ConnectorInfo.AllowedType.Type;
 
     public bool AllowConnect(ConnectorModel model)
     {

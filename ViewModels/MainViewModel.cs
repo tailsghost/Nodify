@@ -3,9 +3,7 @@ using Nodify.Models;
 using Nodify.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace Nodify.ViewModels;
 
@@ -19,14 +17,12 @@ public class MainViewModel : BaseViewModel
 
     private ConnectorModel _dragFrom;
 
-    //protected GraphViewModel Graph { get; } = new(new GraphModel());
-
-    public ObservableCollection<NodeViewModel> Nodes { get; }
+    public ObservableCollection<NodeViewModel> Nodes { get; protected set; }
     public ObservableCollection<ContainerViewModel> Containers { get; }
     public ObservableCollection<ConnectionViewModel> Connections { get; }
     public ObservableCollection<MenuLibrary> MenuLibrary { get; protected set; } = [];
 
-    public ICommand AddNodeCmd { get; }
+    public ICommand AddNodeCmd { get; protected set; }
     public ICommand AddContainerCmd { get; }
     public ICommand BeginConnectCmd { get; }
     public ICommand CompleteConnectCmd { get; }
@@ -101,9 +97,10 @@ public class MainViewModel : BaseViewModel
         {
             if (IsConnecting && p is ConnectorViewModel to && _dragFrom != null && to.Model != _dragFrom)
             {
-                var e = new EdgeModel(_dragFrom, to.Model);
-                _dragFrom.ConnectedTo = to.Model;
-                to.Model.ConnectedTo = _dragFrom;
+                var outputPort = _dragFrom.IsInput ? to.Model : _dragFrom;
+                var inputPort = _dragFrom.IsInput ? _dragFrom : to.Model;
+
+                var e = new EdgeModel(outputPort, inputPort);
                 Connections.Add(new ConnectionViewModel(e));
             }
             IsConnecting = false;

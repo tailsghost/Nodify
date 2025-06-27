@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 using Nodify.Interfaces;
+using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 
 namespace Nodify.Models;
@@ -10,10 +10,10 @@ public class NodeModel : BaseViewModel, IConnectable
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; init; }
     public string Description { get; init; }
-
     public List<IConnectorInfo> InputsInfo;
     public List<IConnectorInfo> OutputsInfo;
 
+    public NodeViewModel NodeViewModel { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; }
