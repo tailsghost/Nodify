@@ -38,111 +38,115 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="#0D0D0D">
+    <Grid Background="#0D0D0D" ClipToBounds="True">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="250" />
         </Grid.ColumnDefinitions>
-        <Canvas
-            x:Name="SpaceCanvas"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Width="5000"
-            Height="2500"
-            Margin="5"
-            Background="{StaticResource GridBrush}"
-            MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-            MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-            MouseMove="Canvas_MouseMove"
-            SnapsToDevicePixels="True">
+        <AdornerDecorator Grid.Column="0" Grid.ColumnSpan="2">
+            <Canvas
+                ClipToBounds="True"
+                x:Name="SpaceCanvas"
+                Width="5000"
+                Height="2500"
+                Margin="5"
+                Background="{StaticResource GridBrush}"
+                MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                MouseMove="Canvas_MouseMove"
+                SnapsToDevicePixels="True">
 
-            <Canvas.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform x:Name="SpaceScale" ScaleX="1" ScaleY="1" />
-                    <TranslateTransform x:Name="SpaceTranslate" X="0" Y="0" />
-                </TransformGroup>
-            </Canvas.RenderTransform>
+                <Canvas.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="SpaceScale" ScaleX="1" ScaleY="1" />
+                        <TranslateTransform x:Name="SpaceTranslate" X="0" Y="0" />
+                    </TransformGroup>
+                </Canvas.RenderTransform>
 
-            <ItemsControl ItemsSource="{Binding ViewModel.Containers, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:ContainerViewModel}">
-                        <local:NodeContainerControl
-                            Panel.ZIndex="10"
-                            NodeContainerMouseDown="ContainerControl_OnMouseDown"
-                            NodeContainerMouseUp="ContainerControl_OnMouseUp"
-                            NodeContainerMove="ContainerControl_OnMouseMove" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding X}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ItemsControl>
+                <ItemsControl ItemsSource="{Binding ViewModel.Containers, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:ContainerViewModel}">
+                            <local:NodeContainerControl
+                                Panel.ZIndex="10"
+                                NodeContainerMouseDown="ContainerControl_OnMouseDown"
+                                NodeContainerMouseUp="ContainerControl_OnMouseUp"
+                                NodeContainerMove="ContainerControl_OnMouseMove" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding X}" />
+                            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
 
-            <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:ConnectionControl ConnectionMouseRightClick="UIElement_OnMouseRightButtonDown" Panel.ZIndex="20" DataContext="{Binding}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:ConnectionControl
+                                Panel.ZIndex="20"
+                                ConnectionMouseRightClick="UIElement_OnMouseRightButtonDown"
+                                DataContext="{Binding}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-            <Path
-                IsHitTestVisible="False"
-                Stroke="Beige"
-                StrokeThickness="3"
-                Visibility="{Binding ViewModel.IsConnecting, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Path.Data>
-                    <PathGeometry>
-                        <PathFigure StartPoint="{Binding ViewModel.TempStart, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
-                            <BezierSegment
-                                Point1="{Binding ViewModel.TempControl1, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
-                                Point2="{Binding ViewModel.TempControl2, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
-                                Point3="{Binding ViewModel.TempEndPoint, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
-                        </PathFigure>
-                    </PathGeometry>
-                </Path.Data>
-            </Path>
+                <Path
+                    IsHitTestVisible="False"
+                    Stroke="Beige"
+                    StrokeThickness="3"
+                    Visibility="{Binding ViewModel.IsConnecting, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathFigure StartPoint="{Binding ViewModel.TempStart, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                                <BezierSegment
+                                    Point1="{Binding ViewModel.TempControl1, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
+                                    Point2="{Binding ViewModel.TempControl2, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}"
+                                    Point3="{Binding ViewModel.TempEndPoint, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}" />
+                            </PathFigure>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
 
-            <ItemsControl ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:NodeControl
-                            Panel.ZIndex="100"
-                            NodeMouseRightClick="NodeControl_OnNodeMouseRightClick"
-                            ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
-                            ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
-                            DataContext="{Binding}"
-                            NodeMouseMove="NodeControl_OnNodeMouseMove"
-                            NodeMouseMoveDown="NodeControl_OnNodeMouseDown"
-                            NodeMouseMoveUp="NodeControl_OnNodeMouseUp" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding X}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ItemsControl>
-        </Canvas>
+                <ItemsControl x:Name="NodesItemsControl" ItemsSource="{Binding ViewModel.Nodes, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:NodeControl
+                                Panel.ZIndex="100"
+                                ConnectorMouseDown="NodeControl_OnConnectorMouseDown"
+                                ConnectorMouseUp="NodeControl_OnConnectorMouseUp"
+                                DataContext="{Binding}"
+                                NodeMouseMove="NodeControl_OnNodeMouseMove"
+                                NodeMouseMoveDown="NodeControl_OnNodeMouseDown"
+                                NodeMouseMoveUp="NodeControl_OnNodeMouseUp"
+                                NodeMouseRightClick="NodeControl_OnNodeMouseRightClick" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding X}" />
+                            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </Canvas>
+        </AdornerDecorator>
 
         <local:MenuLibraryControl
             Grid.Column="1"

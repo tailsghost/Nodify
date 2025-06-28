@@ -25,6 +25,7 @@ namespace Nodify.Views
         private ConnectorViewModel _dragConnector;
 
         private NodeViewModel _currentMoveNode;
+        private NodeControl _ghostControl;
 
         public MainViewModel ViewModel { get; }
 
@@ -43,7 +44,10 @@ namespace Nodify.Views
                 Visibility = Visibility.Collapsed,
                 IsHitTestVisible = false
             };
-            Loaded += (s, e) => SpaceCanvas.Children.Add(_tempRect);
+            Loaded += (s, e) =>
+            {
+                SpaceCanvas.Children.Add(_tempRect);
+            };
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -77,7 +81,12 @@ namespace Nodify.Views
             var pt = e.GetPosition(SpaceCanvas);
 
             if (_currentMoveNode != null)
+            {
+                _ghostControl.Opacity = 0.5;
                 Mouse.OverrideCursor = Cursors.SizeAll;
+                Canvas.SetLeft(_ghostControl, pt.X);
+                Canvas.SetTop(_ghostControl, pt.Y);
+            }
 
 
             if (_isCreatingContainer)
@@ -120,7 +129,12 @@ namespace Nodify.Views
                 ViewModel.EndDrag(null);
                 _currentMoveNode = null;
                 Mouse.OverrideCursor = null;
-                return;
+                Mouse.OverrideCursor = null;
+                if (_ghostControl != null)
+                {
+                    SpaceCanvas.Children.Remove(_ghostControl);
+                    _ghostControl = null;
+                }
             }
 
             if (_isCreatingContainer)
@@ -218,6 +232,11 @@ namespace Nodify.Views
             {
                 Mouse.OverrideCursor = null;
                 _currentMoveNode = null;
+                if (_ghostControl != null)
+                {
+                    SpaceCanvas.Children.Remove(_ghostControl);
+                    _ghostControl = null;
+                }
             }
 
             if (_dragItem is not NodeViewModel) return;
@@ -277,19 +296,39 @@ namespace Nodify.Views
             if (e.OriginalSource is not Grid grid) return;
             if (grid.DataContext is not NodeViewModel model) return;
             _currentMoveNode = model;
-            Mouse.OverrideCursor = Cursors.SizeAll;
+            _ghostControl = new NodeControl
+            {
+                DataContext = model,
+                Opacity = 0,
+                IsHitTestVisible = false
+            };
+            SpaceCanvas.Children.Add(_ghostControl);
+            Panel.SetZIndex(_ghostControl, int.MaxValue);
+            Canvas.SetLeft(_ghostControl, model.X);
+            Canvas.SetTop(_ghostControl, model.Y);
+            Mouse.OverrideCursor = Cursors.None;
         }
 
         private void MenuLibraryControl_OnMenuMouseMove(object sender, MouseEventArgs e)
         {
             if (_currentMoveNode != null)
+            {
+                if (_ghostControl != null) _ghostControl.Opacity = 0;
                 Mouse.OverrideCursor = Cursors.No;
+            }
         }
 
         private void MenuLibraryControl_OnMenuMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_ghostControl != null)
+            {
+                SpaceCanvas.Children.Remove(_ghostControl);
+                _ghostControl = null;
+            }
+
             _currentMoveNode = null;
             Mouse.OverrideCursor = null;
+            e.Handled = true;
         }
     }
 }
