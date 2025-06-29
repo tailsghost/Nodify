@@ -1,4 +1,6 @@
-﻿namespace Nodify.Helpers;
+﻿using System.Text.RegularExpressions;
+
+namespace Nodify.Helpers;
 
 public static class DesignatorManager
 {
@@ -7,6 +9,7 @@ public static class DesignatorManager
 
     public static string Generate(string prefix)
     {
+
         if (!_usedIndices.TryGetValue(prefix, out var set))
         {
             set = [];
@@ -25,6 +28,31 @@ public static class DesignatorManager
 
         set.Add(i);
         return $"{prefix}_{i}";
+
+    }
+    public static void Clear()
+    {
+        _usedIndices.Clear();
+    }
+
+    public static string Recover(string designator)
+    {
+        var parts = designator.Split('_', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length <= 1 || !int.TryParse(parts[^1], out var index)) return Generate(designator);
+
+        var basePrefix = string.Join("_", parts[..^1]);
+
+        if (!_usedIndices.TryGetValue(basePrefix, out var set))
+        {
+            set = [];
+            _usedIndices[basePrefix] = set;
+        }
+
+        if (!set.Add(index))
+            throw new InvalidOperationException($"Designator '{designator}' уже существует.");
+
+        return designator;
+
     }
 
     public static void Release(string designator)
@@ -33,7 +61,7 @@ public static class DesignatorManager
         while (pos >= 0 && char.IsDigit(designator[pos]))
             pos--;
 
-        var prefix = designator[..(pos+1)];
+        var prefix = designator[..(pos + 1)];
         if (!int.TryParse(designator[(pos + 1)..], out var idx))
             return;
 

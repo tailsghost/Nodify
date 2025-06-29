@@ -82,6 +82,11 @@ public class NodeViewModel: BaseViewModel
         Node.Designator = DesignatorManager.Generate(Node.Name);
     }
 
+    public void RecoverDesignator()
+    {
+        Node.Designator = DesignatorManager.Recover(Node.Designator);
+    }
+
     public void ReleaseDesignator()
     {
        DesignatorManager.Release(Node.Designator);
