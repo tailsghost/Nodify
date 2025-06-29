@@ -33,7 +33,7 @@ public static class DesignatorManager
         while (pos >= 0 && char.IsDigit(designator[pos]))
             pos--;
 
-        var prefix = designator.Substring(0, pos+1);
+        var prefix = designator[..(pos+1)];
         if (!int.TryParse(designator[(pos + 1)..], out var idx))
             return;
 
