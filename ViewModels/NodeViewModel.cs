@@ -12,21 +12,6 @@ public class NodeViewModel: BaseViewModel
     public string Description => Node.Description;
     public bool IsFinalBlock => Node.IsFinalBlock;
 
-    private string _designator;
-
-    public string Designator
-    {
-        get
-        {
-            return _designator is null or "" ? Name : _designator;
-        }
-        set
-        {
-            _designator = value;
-            OnPropertyChanged();
-        }
-    }
-
     public NodeModel Node { get; }
 
     public double X
@@ -80,15 +65,26 @@ public class NodeViewModel: BaseViewModel
         }
     }
 
+    public string Designator
+    {
+        get => Node.Designator is null or "" ? Name : Node.Designator;
+        set
+        {
+            if (Node.Designator == value) return;
+            Node.Designator = value;
+            OnPropertyChanged();
+        }
+    }
+
 
     public void GenerateDesignator()
     {
-        Designator = DesignatorManager.Generate(Node.Name);
+        Node.Designator = DesignatorManager.Generate(Node.Name);
     }
 
     public void ReleaseDesignator()
     {
-       DesignatorManager.Release(Designator);
+       DesignatorManager.Release(Node.Designator);
     }
 
     public NodeViewModel(NodeModel m)

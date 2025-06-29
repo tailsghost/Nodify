@@ -24,7 +24,7 @@ public static class DesignatorManager
         }
 
         set.Add(i);
-        return $"{prefix} {i}";
+        return $"{prefix}_{i}";
     }
 
     public static void Release(string designator)
@@ -37,7 +37,7 @@ public static class DesignatorManager
         if (!int.TryParse(designator[(pos + 1)..], out var idx))
             return;
 
-        if (_usedIndices.TryGetValue(prefix.Trim(), out var set))
+        if (_usedIndices.TryGetValue(prefix, out var set))
             set.Remove(idx);
     }
 }

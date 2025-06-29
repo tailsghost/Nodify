@@ -12,8 +12,6 @@ public class NodeModel : BaseViewModel, IConnectable
     public string Description { get; init; }
     public List<IConnectorInfo> InputsInfo;
     public List<IConnectorInfo> OutputsInfo;
-
-    public NodeViewModel NodeViewModel { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; }
@@ -22,6 +20,8 @@ public class NodeModel : BaseViewModel, IConnectable
     public ObservableCollection<ConnectorModel> Outputs { get; } = [];
 
     public bool IsFinalBlock { get; init; }
+
+    public string Designator { get; set; }
 
     public NodeModel(string name, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isFinalBlock = false)
     {

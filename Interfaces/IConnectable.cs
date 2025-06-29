@@ -11,7 +11,7 @@ public interface IConnectable
     double Y { get; }
     double Width { get; }
     double Height { get; }
-
+    string Designator { get; }
     ObservableCollection<ConnectorModel> Inputs { get; }
     ObservableCollection<ConnectorModel> Outputs { get; }
 }

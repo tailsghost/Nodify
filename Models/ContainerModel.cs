@@ -56,6 +56,8 @@ public class ContainerModel : BaseViewModel, IConnectable
         }
     }
 
+    public string Designator { get; }
+
     private ConnectorModel Input { get; }
     private ConnectorModel Output { get; }
 
