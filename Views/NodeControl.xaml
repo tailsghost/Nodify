@@ -47,7 +47,7 @@
                         FontSize="14"
                         FontWeight="Medium"
                         Foreground="Bisque"
-                        Text="{Binding Name}" />
+                        Text="{Binding Designator}" />
                 </Border>
 
                 <ItemsControl

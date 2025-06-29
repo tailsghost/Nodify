@@ -74,6 +74,7 @@ public class MainViewModel : BaseViewModel
             var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description,node.Node.InputsInfo, node.Node.OutputsInfo, node.IsFinalBlock));
             newNode.X = pt.X;
             newNode.Y = pt.Y;
+            newNode.GenerateDesignator();
             Nodes.Add(newNode);
         });
         AddContainerCmd = new RelayCommand(p =>
@@ -176,6 +177,7 @@ public class MainViewModel : BaseViewModel
     public void RemoveNode(NodeViewModel vm)
     {
         Nodes.Remove(vm);
+        vm.ReleaseDesignator();
 
         for (var ci = 0; ci < Containers.Count; ci++)
         {

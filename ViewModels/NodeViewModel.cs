@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Nodify.Helpers;
 using Nodify.Models;
 using Nodify.ViewModels.Base;
 
@@ -10,6 +11,21 @@ public class NodeViewModel: BaseViewModel
     public string Name => Node.Name;
     public string Description => Node.Description;
     public bool IsFinalBlock => Node.IsFinalBlock;
+
+    private string _designator;
+
+    public string Designator
+    {
+        get
+        {
+            return _designator is null or "" ? Name : _designator;
+        }
+        set
+        {
+            _designator = value;
+            OnPropertyChanged();
+        }
+    }
 
     public NodeModel Node { get; }
 
@@ -62,6 +78,17 @@ public class NodeViewModel: BaseViewModel
             }
             return list;
         }
+    }
+
+
+    public void GenerateDesignator()
+    {
+        Designator = DesignatorManager.Generate(Node.Name);
+    }
+
+    public void ReleaseDesignator()
+    {
+       DesignatorManager.Release(Designator);
     }
 
     public NodeViewModel(NodeModel m)
