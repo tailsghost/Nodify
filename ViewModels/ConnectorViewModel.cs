@@ -1,5 +1,4 @@
-﻿using Nodify.Interfaces;
-using Nodify.Models;
+﻿using Nodify.Models;
 using Nodify.ViewModels.Base;
 using System.Windows.Media;
 
@@ -16,7 +15,6 @@ public class ConnectorViewModel : BaseViewModel
     }
 
     public ConnectorModel Model { get; }
-
     public string Name => Model.Name;
     public bool IsInput => Model.IsInput;
     public int Index => Model.Index;
@@ -40,19 +38,9 @@ public class ConnectorViewModel : BaseViewModel
 
     public bool IsConnected => Model.ConnectedTo != null;
     public ConnectorModel ConnectedTo => Model.ConnectedTo;
-    public  IConnectable Parent => Model.Node;
 
-    public string Type => Model.ConnectorInfo.AllowedType.Type;
-
-    public bool AllowConnect(ConnectorModel model)
+    public virtual bool AllowConnect(ConnectorModel model)
     {
-
-        if (Model.IsFinalBlock || model.IsFinalBlock)
-        {
-            return Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
-        }
-
-        return !(this.IsConnected && model.ConnectedTo != null) && this.IsInput != model.IsInput &&
-                     this.Model.ConnectorInfo.AllowedType.Type == model.ConnectorInfo.AllowedType.Type;
+        return true;
     }
 }

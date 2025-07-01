@@ -1,13 +1,11 @@
-﻿using System.Text.RegularExpressions;
-
-namespace Nodify.Helpers;
+﻿namespace Nodify.Helpers;
 
 public static class DesignatorManager
 {
 
     private static readonly Dictionary<string, SortedSet<int>> _usedIndices = [];
 
-    public static string Generate(string prefix)
+    public static int Generate(string prefix)
     {
 
         if (!_usedIndices.TryGetValue(prefix, out var set))
@@ -27,7 +25,7 @@ public static class DesignatorManager
         }
 
         set.Add(i);
-        return $"{prefix}_{i}";
+        return i;
 
     }
     public static void Clear()
@@ -35,38 +33,36 @@ public static class DesignatorManager
         _usedIndices.Clear();
     }
 
-    public static string Recover(string designator)
+    public static int Recover(string prefix, int designator)
     {
-        var parts = designator.Split('_', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length <= 1 || !int.TryParse(parts[^1], out var index)) return Generate(designator);
 
-        var basePrefix = string.Join("_", parts[..^1]);
-
-        if (!_usedIndices.TryGetValue(basePrefix, out var set))
+        if (!_usedIndices.TryGetValue(prefix, out var set))
         {
             set = [];
-            _usedIndices[basePrefix] = set;
+            _usedIndices[prefix] = set;
         }
 
-        if (!set.Add(index))
+        if (!set.Add(designator))
             throw new InvalidOperationException($"Designator '{designator}' уже существует.");
 
         return designator;
 
     }
 
-    public static void Release(string designator)
+    public static void Release(string prefix, int designator)
     {
-        var pos = designator.Length - 1;
-        while (pos >= 0 && char.IsDigit(designator[pos]))
-            pos--;
-
-        var prefix = designator[..(pos + 1)];
-        if (!int.TryParse(designator[(pos + 1)..], out var idx))
-            return;
-
-        if (_usedIndices.TryGetValue(prefix, out var set))
-            set.Remove(idx);
+        if (!_usedIndices.TryGetValue(prefix, out var set)) return;
+        var item = 0;
+        var find = false;
+        for (var i = 0; i < set.Count; i++)
+        {
+            item = set.ElementAt(i);
+            if (item != designator) continue;
+            find = true;
+            break;
+        }
+        if(find)
+            set.Remove(item);
     }
 }
 

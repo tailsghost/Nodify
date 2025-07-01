@@ -63,29 +63,6 @@
                     </TransformGroup>
                 </Canvas.RenderTransform>
 
-                <ItemsControl ItemsSource="{Binding ViewModel.Containers, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:ContainerViewModel}">
-                            <local:NodeContainerControl
-                                Panel.ZIndex="10"
-                                NodeContainerMouseDown="ContainerControl_OnMouseDown"
-                                NodeContainerMouseUp="ContainerControl_OnMouseUp"
-                                NodeContainerMove="ContainerControl_OnMouseMove" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding X}" />
-                            <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                </ItemsControl>
-
                 <ItemsControl ItemsSource="{Binding ViewModel.Connections, RelativeSource={RelativeSource AncestorType=local:NodeSpaceControl}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

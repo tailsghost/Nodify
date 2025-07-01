@@ -22,8 +22,6 @@ namespace Nodify.Views
         private Point _dragMouseStart;
         private Point _dragItemStart;
 
-        private ConnectorViewModel _dragConnector;
-
         private NodeViewModel _currentMoveNode;
         private NodeControl _ghostControl;
 
@@ -137,20 +135,6 @@ namespace Nodify.Views
                 }
             }
 
-            if (_isCreatingContainer)
-            {
-                _isCreatingContainer = false;
-                _tempRect.Visibility = Visibility.Collapsed;
-
-                var rect = new Rect(
-                    Canvas.GetLeft(_tempRect),
-                    Canvas.GetTop(_tempRect),
-                    _tempRect.Width,
-                    _tempRect.Height
-                );
-                ViewModel.AddContainerCmd.Execute(rect);
-            }
-
             if (_isPanning)
             {
                 _isPanning = false;
@@ -185,7 +169,6 @@ namespace Nodify.Views
         private void NodeControl_OnConnectorMouseDown(object sender, RoutedEventArgs e)
         {
             if (e.OriginalSource is not Ellipse { Tag: ConnectorViewModel c }) return;
-            _dragConnector = c;
             ViewModel.BeginDrag(c);
             e.Handled = true;
         }
@@ -194,7 +177,6 @@ namespace Nodify.Views
         {
             if (e.OriginalSource is not Ellipse { Tag: ConnectorViewModel c }) return;
             ViewModel.EndDrag(c);
-            _dragConnector = null;
             e.Handled = true;
         }
 
@@ -250,7 +232,7 @@ namespace Nodify.Views
             if (sender is not NodeControl node) return;
             if(node.DataContext is not NodeViewModel vm) return;
 
-            ViewModel.RemoveNode(vm);
+            ViewModel.RemoveNodeCmd.Execute(vm);
             e.Handled = true;
         }
 
@@ -262,39 +244,11 @@ namespace Nodify.Views
             e.Handled = true;
         }
 
-        private void ContainerControl_OnMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is not NodeContainerControl { DataContext: ContainerViewModel vm } ctl) return;
-            _dragItem = vm;
-            _dragMouseStart = e.GetPosition(SpaceCanvas);
-            _dragItemStart = new Point(vm.X, vm.Y);
-            ctl.CaptureMouse();
-            e.Handled = true;
-        }
-
-        private void ContainerControl_OnMouseMove(object sender, MouseEventArgs e)
-        {
-            var pt = e.GetPosition(SpaceCanvas);
-            ViewModel.UpdateDrag(pt);
-            if (_dragItem is not ContainerViewModel vm || e.LeftButton != MouseButtonState.Pressed) return;
-            var dx = pt.X - _dragMouseStart.X;
-            var dy = pt.Y - _dragMouseStart.Y;
-            vm.X = _dragItemStart.X + dx;
-            vm.Y = _dragItemStart.Y + dy;
-            e.Handled = true;
-        }
-
-        private void ContainerControl_OnMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_dragItem is not ContainerViewModel) return;
-            (sender as NodeContainerControl)?.ReleaseMouseCapture();
-            _dragItem = null;
-        }
-
         private void MenuLibraryControl_OnMenuMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource is not Grid grid) return;
             if (grid.DataContext is not NodeViewModel model) return;
+
             _currentMoveNode = model;
             _ghostControl = new NodeControl
             {
@@ -325,7 +279,6 @@ namespace Nodify.Views
                 SpaceCanvas.Children.Remove(_ghostControl);
                 _ghostControl = null;
             }
-
             _currentMoveNode = null;
             Mouse.OverrideCursor = null;
             e.Handled = true;

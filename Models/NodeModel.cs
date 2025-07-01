@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
 using Nodify.Interfaces;
-using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 
 namespace Nodify.Models;
 
-public class NodeModel : BaseViewModel, IConnectable
+public class NodeModel : BaseViewModel
 {
+    public bool IsMenuEnable { get; set; } = true;
+    public Brush ColorText { get; set; } = Brushes.AliceBlue;
+
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; init; }
     public string Description { get; init; }
@@ -16,12 +19,10 @@ public class NodeModel : BaseViewModel, IConnectable
     public double Y { get; set; }
     public double Width { get; }
     public double Height { get; }
+
     public ObservableCollection<ConnectorModel> Inputs { get; } = [];
     public ObservableCollection<ConnectorModel> Outputs { get; } = [];
-
     public bool IsFinalBlock { get; init; }
-
-    public string Designator { get; set; }
 
     public NodeModel(string name, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isFinalBlock = false)
     {
@@ -33,6 +34,7 @@ public class NodeModel : BaseViewModel, IConnectable
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
+            var connector = new ConnectorModel(this, i, 12, true, input, isFinalBlock);
             Inputs.Add(new ConnectorModel(this, i, 12, true, input, isFinalBlock));
         }
 

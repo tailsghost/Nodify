@@ -41,6 +41,7 @@
                                 <Grid
                                     Margin="2"
                                     Cursor="Hand"
+                                    IsEnabled="{Binding IsMenuEnable}"
                                     MouseLeftButtonDown="OnMenuMouseDown"
                                     Tag="{Binding}">
                                     <Grid.ColumnDefinitions>
@@ -57,7 +58,7 @@
                                     <TextBlock
                                         Grid.Column="1"
                                         VerticalAlignment="Center"
-                                        Foreground="AliceBlue"
+                                        Foreground="{Binding ColorText}"
                                         Text="{Binding Name}"
                                         ToolTip="{Binding Description}" />
                                 </Grid>

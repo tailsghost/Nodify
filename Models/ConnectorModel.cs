@@ -15,9 +15,12 @@ public class ConnectorModel : BaseViewModel
 
     public IConnectorInfo ConnectorInfo { get; }
 
-    public IConnectable Node { get; }
+    public NodeModel Node { get; }
     public bool IsInput { get; }
-    public string Name => ConnectorInfo.Name;  
+
+    public string Name => ConnectorInfo.Name;
+
+    public string AltName { get; set; }
 
     public string Type => ConnectorInfo.AllowedType.Type;
 
@@ -58,7 +61,7 @@ public class ConnectorModel : BaseViewModel
         }
     }
 
-    public ConnectorModel(IConnectable parent, int index, double size, bool isInput, IConnectorInfo connectorInfo, bool isFinalBlock = false)
+    public ConnectorModel(NodeModel parent, int index, double size, bool isInput, IConnectorInfo connectorInfo, bool isFinalBlock = false)
     {
         Node = parent;
         IsInput = isInput;
