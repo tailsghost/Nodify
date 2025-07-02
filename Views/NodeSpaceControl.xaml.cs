@@ -9,7 +9,10 @@ namespace Nodify.Views
 {
     public partial class NodeSpaceControl : UserControl
     {
-        private const double MinZoom = 0.75, MaxZoom = 1.25, ZoomStep = 0.1;
+        private const int Step = 30;
+        private const int Offset = 15;
+        public int WidthCanvas { get; } = 3000;
+        public int HeightCanvas { get; } = 1800;
 
         private bool _isCreatingContainer;
         private Point _containerStart;
@@ -27,9 +30,28 @@ namespace Nodify.Views
 
         public MainViewModel ViewModel { get; }
 
+        public List<Point> GridPoints { get; } = new List<Point>(20000);
+
         public NodeSpaceControl(MainViewModel viewModel)
         {
+
             InitializeComponent();
+
+            Task.Run(() =>
+            {
+                var countX = Math.Max(0, (int)Math.Ceiling((WidthCanvas - Offset) / (double)Step));
+                var countY = Math.Max(0, (int)Math.Ceiling((HeightCanvas - Offset) / (double)Step));
+
+                for (var ix = 0; ix < countX; ix++)
+                {
+                    double x = Offset + ix * Step;
+                    for (var iy = 0; iy < countY; iy++)
+                    {
+                        double y = Offset + iy * Step;
+                        GridPoints.Add(new Point(x, y));
+                    }
+                }
+            });
 
             DataContext = this;
             ViewModel = viewModel;
@@ -102,12 +124,11 @@ namespace Nodify.Views
             {
                 var delta = e.GetPosition(this) - _panStart;
                 _panStart = e.GetPosition(this);
-                var scale = SpaceScale.ScaleX;
-                var nx = SpaceTranslate.X + delta.X / scale;
-                var ny = SpaceTranslate.Y + delta.Y / scale;
+                var nx = SpaceTranslate.X + delta.X;
+                var ny = SpaceTranslate.Y + delta.Y;
 
-                var maxX = ActualWidth - (SpaceCanvas.Width * scale);
-                var maxY = ActualHeight - (SpaceCanvas.Height * scale);
+                var maxX = ActualWidth - (SpaceCanvas.Width);
+                var maxY = ActualHeight - (SpaceCanvas.Height);
                 SpaceTranslate.X = Math.Min(0, Math.Max(maxX, nx));
                 SpaceTranslate.Y = Math.Min(0, Math.Max(maxY, ny));
 
@@ -123,7 +144,11 @@ namespace Nodify.Views
 
             if (_currentMoveNode != null)
             {
-                ViewModel.AddNodeCmd.Execute((e.GetPosition(SpaceCanvas), _currentMoveNode));
+                var snapX = Offset + Math.Floor((pt.X - Offset) / Step) * Step;
+                var snapY = Offset + Math.Floor((pt.Y - Offset) / Step) * Step;
+
+                var snapPt = new Point(snapX, snapY);
+                ViewModel.AddNodeCmd.Execute((snapPt, _currentMoveNode));
                 ViewModel.EndDrag(null);
                 _currentMoveNode = null;
                 Mouse.OverrideCursor = null;
@@ -148,21 +173,14 @@ namespace Nodify.Views
         {
             if (!Keyboard.IsKeyDown(Key.LeftCtrl)) return;
 
-            var old = SpaceScale.ScaleX;
-            var delta = e.Delta > 0 ? ZoomStep : -ZoomStep;
-            var ns = Math.Clamp(old + delta, MinZoom, MaxZoom);
-            var ratio = ns / old;
             var mp = e.GetPosition(SpaceCanvas);
 
-            var nx = (SpaceTranslate.X - mp.X) * ratio + mp.X;
-            var ny = (SpaceTranslate.Y - mp.Y) * ratio + mp.Y;
-
-            var maxX = ActualWidth - SpaceCanvas.Width * ns;
-            var maxY = ActualHeight - SpaceCanvas.Height * ns;
-            SpaceTranslate.X = Math.Min(0, Math.Max(maxX, ns));
+            var nx = (SpaceTranslate.X - mp.X) + mp.X;
+            var ny = (SpaceTranslate.Y - mp.Y) + mp.Y;
+            var maxX = ActualWidth - SpaceCanvas.Width;
+            var maxY = ActualHeight - SpaceCanvas.Height;
+            SpaceTranslate.X = Math.Min(0, Math.Max(maxX, nx));
             SpaceTranslate.Y = Math.Max(0, Math.Max(maxY, ny));
-
-            SpaceScale.ScaleX = SpaceScale.ScaleY = ns;
             e.Handled = true;
         }
 
@@ -201,10 +219,16 @@ namespace Nodify.Views
             var pt = e.GetPosition(SpaceCanvas);
             ViewModel.UpdateDrag(pt);
             if (_dragItem is not NodeViewModel vm || e.LeftButton != MouseButtonState.Pressed) return;
+
             var dx = pt.X - _dragMouseStart.X;
             var dy = pt.Y - _dragMouseStart.Y;
-            ViewModel.TryMoveNode(vm, SpaceCanvas.ActualWidth, SpaceCanvas.ActualHeight, _dragItemStart.X + dx,
-                _dragItemStart.Y + dy);
+            var rawX = _dragItemStart.X + dx;
+            var rawY = _dragItemStart.Y + dy;
+
+            var snapX = Offset + Math.Floor((rawX - Offset) / Step) * Step;
+            var snapY = Offset + Math.Floor((rawY - Offset) / Step) * Step;
+
+            ViewModel.TryMoveNode(vm, SpaceCanvas.ActualWidth, SpaceCanvas.ActualHeight, snapX, snapY);
             e.Handled = true;
         }
 
@@ -230,7 +254,7 @@ namespace Nodify.Views
         private void NodeControl_OnNodeMouseRightClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not NodeControl node) return;
-            if(node.DataContext is not NodeViewModel vm) return;
+            if (node.DataContext is not NodeViewModel vm) return;
 
             ViewModel.RemoveNodeCmd.Execute(vm);
             e.Handled = true;
@@ -239,7 +263,7 @@ namespace Nodify.Views
         private void UIElement_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is not ConnectionControl connection) return;
-            if(connection.DataContext is not ConnectionViewModel vm) return;
+            if (connection.DataContext is not ConnectionViewModel vm) return;
             ViewModel.RemoveConnection(vm);
             e.Handled = true;
         }

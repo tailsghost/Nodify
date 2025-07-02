@@ -71,4 +71,12 @@ public class ConnectorModel : BaseViewModel
         IsFinalBlock = isFinalBlock;
         Id = connectorInfo.Id == null || connectorInfo.Id == Guid.Empty ? Guid.NewGuid() : connectorInfo.Id;
     }
+
+
+
+    //public virtual string SpecialMethod()
+    //{
+    //    return $""
+    //};
+
 }
