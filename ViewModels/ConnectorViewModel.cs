@@ -16,8 +16,10 @@ public class ConnectorViewModel : BaseViewModel
 
     public ConnectorModel Model { get; }
     public string Name => Model.Name;
+    public string AltName => Model.AltName;
     public bool IsInput => Model.IsInput;
     public int Index => Model.Index;
+    public bool IsTemp => Model.IsTemp;
 
     public double ConnectorSize { get; init; } = 12;
 
@@ -38,6 +40,8 @@ public class ConnectorViewModel : BaseViewModel
 
     public bool IsConnected => Model.ConnectedTo != null;
     public ConnectorModel ConnectedTo => Model.ConnectedTo;
+
+    public string SetFunc => Model.SetFunc;
 
     public virtual bool AllowConnect(ConnectorModel model)
     {

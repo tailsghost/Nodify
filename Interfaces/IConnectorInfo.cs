@@ -9,6 +9,9 @@ public interface IConnectorInfo
     string AltName { get; }
     IAllowedType AllowedType { get; }
     string Description { get; init; }
-    public Color Color { get; }
+    Color Color { get; }
+    string[] TMP_VAR { get; }
+    string SetFunc { get; set; }
+    bool IsTemp { get; set; }
 }
 

@@ -9,17 +9,13 @@ namespace Nodify.Views
 {
     public partial class NodeSpaceControl : UserControl
     {
-        private const int Step = 30;
+        private const int Step = 35;
         private const int Offset = 15;
-        public int WidthCanvas { get; } = 3000;
-        public int HeightCanvas { get; } = 1800;
+        public int WidthCanvas { get; } = 4000;
+        public int HeightCanvas { get; } = 2500;
 
-        private bool _isCreatingContainer;
-        private Point _containerStart;
+
         private readonly Rectangle _tempRect;
-
-        private bool _isPanning;
-        private Point _panStart;
 
         private object _dragItem;
         private Point _dragMouseStart;
@@ -30,7 +26,7 @@ namespace Nodify.Views
 
         public MainViewModel ViewModel { get; }
 
-        public List<Point> GridPoints { get; } = new List<Point>(20000);
+        public List<Point> GridPoints { get; } = new List<Point>(10000);
 
         public NodeSpaceControl(MainViewModel viewModel)
         {
@@ -39,8 +35,8 @@ namespace Nodify.Views
 
             Task.Run(() =>
             {
-                var countX = Math.Max(0, (int)Math.Ceiling((WidthCanvas - Offset) / (double)Step));
-                var countY = Math.Max(0, (int)Math.Ceiling((HeightCanvas - Offset) / (double)Step));
+                var countX = (WidthCanvas - Offset) / Step;
+                var countY = (HeightCanvas - Offset) / Step;
 
                 for (var ix = 0; ix < countX; ix++)
                 {
@@ -74,25 +70,6 @@ namespace Nodify.Views
         {
             var pt = e.GetPosition(SpaceCanvas);
 
-            if (Keyboard.IsKeyDown(Key.LeftShift))
-            {
-                _isCreatingContainer = true;
-                _containerStart = pt;
-                Canvas.SetLeft(_tempRect, pt.X);
-                Canvas.SetTop(_tempRect, pt.Y);
-                _tempRect.Width = _tempRect.Height = 0;
-                _tempRect.Visibility = Visibility.Visible;
-                return;
-            }
-
-            if (Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                _isPanning = true;
-                _panStart = e.GetPosition(this);
-                SpaceCanvas.CaptureMouse();
-                return;
-            }
-
             ViewModel.BeginDrag(null);
         }
 
@@ -106,33 +83,6 @@ namespace Nodify.Views
                 Mouse.OverrideCursor = Cursors.SizeAll;
                 Canvas.SetLeft(_ghostControl, pt.X);
                 Canvas.SetTop(_ghostControl, pt.Y);
-            }
-
-
-            if (_isCreatingContainer)
-            {
-                var x = Math.Min(pt.X, _containerStart.X);
-                var y = Math.Min(pt.Y, _containerStart.Y);
-                _tempRect.Width = Math.Abs(pt.X - _containerStart.X);
-                _tempRect.Height = Math.Abs(pt.Y - _containerStart.Y);
-                Canvas.SetLeft(_tempRect, x);
-                Canvas.SetTop(_tempRect, y);
-                return;
-            }
-
-            if (_isPanning)
-            {
-                var delta = e.GetPosition(this) - _panStart;
-                _panStart = e.GetPosition(this);
-                var nx = SpaceTranslate.X + delta.X;
-                var ny = SpaceTranslate.Y + delta.Y;
-
-                var maxX = ActualWidth - (SpaceCanvas.Width);
-                var maxY = ActualHeight - (SpaceCanvas.Height);
-                SpaceTranslate.X = Math.Min(0, Math.Max(maxX, nx));
-                SpaceTranslate.Y = Math.Min(0, Math.Max(maxY, ny));
-
-                return;
             }
 
             ViewModel.UpdateDrag(pt);
@@ -160,28 +110,7 @@ namespace Nodify.Views
                 }
             }
 
-            if (_isPanning)
-            {
-                _isPanning = false;
-                SpaceCanvas.ReleaseMouseCapture();
-            }
-
             ViewModel.EndDrag(null);
-        }
-
-        private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (!Keyboard.IsKeyDown(Key.LeftCtrl)) return;
-
-            var mp = e.GetPosition(SpaceCanvas);
-
-            var nx = (SpaceTranslate.X - mp.X) + mp.X;
-            var ny = (SpaceTranslate.Y - mp.Y) + mp.Y;
-            var maxX = ActualWidth - SpaceCanvas.Width;
-            var maxY = ActualHeight - SpaceCanvas.Height;
-            SpaceTranslate.X = Math.Min(0, Math.Max(maxX, nx));
-            SpaceTranslate.Y = Math.Max(0, Math.Max(maxY, ny));
-            e.Handled = true;
         }
 
         private void NodeControl_OnConnectorMouseDown(object sender, RoutedEventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
 using Nodify.Interfaces;
+using Nodify.ViewModels;
 using Nodify.ViewModels.Base;
 
 namespace Nodify.Models;
@@ -12,21 +13,25 @@ public class NodeModel : BaseViewModel
 
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; init; }
+    public string AltName { get; init; }
     public string Description { get; init; }
     public List<IConnectorInfo> InputsInfo;
     public List<IConnectorInfo> OutputsInfo;
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; }
-    public double Height { get; }
+    public double Height { get; private set; }
 
-    public ObservableCollection<ConnectorModel> Inputs { get; } = [];
-    public ObservableCollection<ConnectorModel> Outputs { get; } = [];
-    public bool IsFinalBlock { get; init; }
+    public ObservableCollection<ConnectorModel> Inputs { get; set; } = [];
+    public ObservableCollection<ConnectorModel> Outputs { get; set; } = [];
 
-    public NodeModel(string name, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isFinalBlock = false)
+    public NodeViewModel Parent { get; set; }
+
+    public NodeModel(string name, string altName, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isUnique = false)
     {
+        IsMenuEnable = isUnique;
         Name = name;
+        AltName = altName;
         Description = description;
         InputsInfo = inputs;
         OutputsInfo = outputs;
@@ -34,21 +39,20 @@ public class NodeModel : BaseViewModel
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            var connector = new ConnectorModel(this, i, 12, true, input, isFinalBlock);
-            Inputs.Add(new ConnectorModel(this, i, 12, true, input, isFinalBlock));
+            var connector = new ConnectorModel(this, i, 12, true, input);
+            Inputs.Add(connector);
         }
 
         for (var i = 0; i < outputs.Count; i++)
         {
             var output = outputs[i];
-            Outputs.Add(new ConnectorModel(this, i, 12, false, output, isFinalBlock));
+            var connector = new ConnectorModel(this, i, 12, false, output);
+            Outputs.Add(connector);
         }
 
         Height = Inputs.Count >= Outputs.Count
             ? CalculationHeight(Inputs.Count, 12, 12) + 30
             : CalculationHeight(Outputs.Count, 12, 12) + 30;
-
-        IsFinalBlock = isFinalBlock;
     }
 
     private double CalculationHeight(int count, int size, int margin)

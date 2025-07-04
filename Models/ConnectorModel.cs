@@ -10,17 +10,17 @@ public class ConnectorModel : BaseViewModel
     private double _y;
 
     public Guid Id { get; init; }
-
-    public bool IsFinalBlock;
-
+    public string SetFunc => ConnectorInfo.SetFunc;
     public IConnectorInfo ConnectorInfo { get; }
 
     public NodeModel Node { get; }
     public bool IsInput { get; }
 
+    public bool IsTemp => ConnectorInfo.IsTemp;
+
     public string Name => ConnectorInfo.Name;
 
-    public string AltName { get; set; }
+    public string AltName => ConnectorInfo.AltName;
 
     public string Type => ConnectorInfo.AllowedType.Type;
 
@@ -39,6 +39,7 @@ public class ConnectorModel : BaseViewModel
             OnPropertyChanged();
         }
     }
+    public string TMP_VAR { get; set; }
 
     public double X
     {
@@ -61,22 +62,14 @@ public class ConnectorModel : BaseViewModel
         }
     }
 
-    public ConnectorModel(NodeModel parent, int index, double size, bool isInput, IConnectorInfo connectorInfo, bool isFinalBlock = false)
+    public ConnectorModel(NodeModel parent, int index, double size, bool isInput, IConnectorInfo connectorInfo)
     {
         Node = parent;
         IsInput = isInput;
         Index = index;
         ConnectorSize = size;
         ConnectorInfo = connectorInfo;
-        IsFinalBlock = isFinalBlock;
         Id = connectorInfo.Id == null || connectorInfo.Id == Guid.Empty ? Guid.NewGuid() : connectorInfo.Id;
     }
-
-
-
-    //public virtual string SpecialMethod()
-    //{
-    //    return $""
-    //};
 
 }

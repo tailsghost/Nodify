@@ -11,11 +11,11 @@ public class BooleanToConnectorsConvert : IValueConverter
         if (parameter?.ToString() == "1")
         {
             if (value is not NodeViewModel vm) throw new ArgumentException("Пришли неверные данные");
-            return vm.IsFinalBlock ? vm.Outputs : vm.Inputs;
+            return vm.Inputs;
         } else if (parameter?.ToString() == "2")
         {
             if (value is not NodeViewModel vm) throw new ArgumentException("Пришли неверные данные");
-            return vm.IsFinalBlock ? vm.Inputs : vm.Outputs;
+            return vm.Outputs;
         }
 
 

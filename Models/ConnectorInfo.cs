@@ -11,7 +11,9 @@ public class ConnectorInfo : IConnectorInfo
     public IAllowedType AllowedType { get; init; }
     public string Description { get; init; }
     public Color Color { get; init; }
-
+    public string[] TMP_VAR { get; init; }
+    public string SetFunc { get; set; }
+    public bool IsTemp { get; set; }
 }
 
 public class AllowedType : IAllowedType

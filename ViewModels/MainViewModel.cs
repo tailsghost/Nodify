@@ -69,7 +69,8 @@ public class MainViewModel : BaseViewModel
         {
             if (p is not (Point pt, NodeViewModel node)) return;
 
-            var newNode = new NodeViewModel(new NodeModel(node.Name, node.Description, node.Node.InputsInfo, node.Node.OutputsInfo, node.IsFinalBlock));
+            var newNode = new NodeViewModel(new NodeModel(node.Name,node.AltName, node.Description, node.Node.InputsInfo, node.Node.OutputsInfo, node.Node.IsMenuEnable));
+
             newNode.X = pt.X;
             newNode.Y = pt.Y;
             Nodes.Add(newNode);
