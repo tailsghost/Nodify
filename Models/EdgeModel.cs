@@ -8,8 +8,8 @@ public class EdgeModel
     public EdgeModel(ConnectorModel src, ConnectorModel tgt)
     {
         Source = src; Target = tgt;
-        Source.ConnectedTo = tgt;
-        Target.ConnectedTo = src;
+        Source.ConnectedTo.Add(tgt);
+        Target.ConnectedTo.Add(src);
     }
 }
 

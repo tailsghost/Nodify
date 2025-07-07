@@ -9,10 +9,10 @@ namespace Nodify.Views
 {
     public partial class NodeSpaceControl : UserControl
     {
-        private const int Step = 35;
+        private const int Step = 40;
         private const int Offset = 15;
-        public int WidthCanvas { get; } = 4000;
-        public int HeightCanvas { get; } = 2500;
+        public int WidthCanvas { get; } = 3500;
+        public int HeightCanvas { get; } = 2250;
 
 
         private readonly Rectangle _tempRect;

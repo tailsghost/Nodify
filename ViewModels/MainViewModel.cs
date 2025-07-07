@@ -204,8 +204,8 @@ public class MainViewModel : BaseViewModel
     public void RemoveConnection(ConnectionViewModel vm)
     {
         var edge = vm.Edge;
-        edge.Source.ConnectedTo = null;
-        edge.Target.ConnectedTo = null;
+        edge.Source.ConnectedTo.Remove(edge.Target);
+        edge.Target.ConnectedTo.Remove(edge.Source);
 
         var removeConnection = new List<ConnectionViewModel>();
         for (var i = 0; i < Connections.Count; i++)

@@ -1,4 +1,5 @@
-﻿using Nodify.Interfaces;
+﻿using System.Collections.ObjectModel;
+using Nodify.Interfaces;
 using Nodify.ViewModels.Base;
 using System.Windows.Media;
 
@@ -27,18 +28,7 @@ public class ConnectorModel : BaseViewModel
     public Color Color => ConnectorInfo.Color;
     public double ConnectorSize { get; }
     public int Index { get; }
-
-    private ConnectorModel? _connectedTo;
-    public ConnectorModel? ConnectedTo
-    {
-        get => _connectedTo;
-        set
-        {
-            if (_connectedTo == value) return;
-            _connectedTo = value;
-            OnPropertyChanged();
-        }
-    }
+    public ObservableCollection<ConnectorModel> ConnectedTo { get; } = [];
     public string TMP_VAR { get; set; }
 
     public double X

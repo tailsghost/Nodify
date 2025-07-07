@@ -8,7 +8,15 @@ namespace Nodify.Models;
 
 public class NodeModel : BaseViewModel
 {
-    public bool IsMenuEnable { get; set; } = true;
+    private bool _isMenuEnable = true;
+    private bool _isUnique { get; }
+
+    public bool IsMenuEnable
+    {
+        get => !_isUnique || _isMenuEnable;
+        set => _isMenuEnable = value;
+    }
+
     public Brush ColorText { get; set; } = Brushes.AliceBlue;
 
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -29,7 +37,7 @@ public class NodeModel : BaseViewModel
 
     public NodeModel(string name, string altName, string description, List<IConnectorInfo> inputs, List<IConnectorInfo> outputs, bool isUnique = false)
     {
-        IsMenuEnable = isUnique;
+        _isUnique = isUnique;
         Name = name;
         AltName = altName;
         Description = description;
